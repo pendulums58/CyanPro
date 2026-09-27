@@ -2767,7 +2767,7 @@ void ClientField::ShowCardInfoInList(ClientCard* pcard, irr::gui::IGUIElement* e
 		str.append(gDataManager->GetName(pcard->code).data());
 	}
 	if((pcard->status & STATUS_PROC_COMPLETE)
-		&& (pcard->type & (TYPE_RITUAL | TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_SPSUMMON)))
+		&& (pcard->type & (TYPE_RITUAL | TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK | TYPE_SPSUMMON | TYPE_ACCESS | TYPE_PAIRING)))
 		str.append(L"\n").append(gDataManager->GetSysString(224).data());
 	for(size_t i = 0; i < chains.size(); ++i) {
 		auto chit = chains[i];

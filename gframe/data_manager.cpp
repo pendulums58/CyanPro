@@ -485,18 +485,27 @@ std::wstring DataManager::FormatRace(uint64_t race, bool isSkill) const {
 }
 std::wstring DataManager::FormatType(uint32_t type) const {
 	std::wstring res;
-	if(type & TYPE_SKILL)
-		res += GetSysString(1077);
-	if(type & TYPE_ACTION) {
-		if (!res.empty())
-			res += L'|';
-		res += GetSysString(1078);
-	}
-	for(uint32_t i = 1050, filter = 1; filter != TYPE_SKILL; filter <<= 1, ++i) {
+	for(uint32_t i = 1050, filter = 1; filter <= TYPE_LINK; filter <<= 1, ++i) {
+		if(filter == TYPE_KEY || filter == TYPE_UNLOCKED)
+			continue;
 		if(type & filter) {
 			if(!res.empty())
 				res += L'|';
 			res += GetSysString(i);
+		}
+	}
+	static constexpr std::pair<uint32_t, uint32_t> orica_types[] = {
+		{TYPE_ACCESS,  1090},
+		{TYPE_HIJACK,  1091},
+		{TYPE_PAIRING, 1092},
+		{TYPE_GIFT,    1093},
+		{TYPE_KEY,     1094},
+	};
+	for(const auto& [flag, strid] : orica_types) {
+		if(type & flag) {
+			if(!res.empty())
+				res += L'|';
+			res += GetSysString(strid);
 		}
 	}
 	if(res.empty())
@@ -656,15 +665,6 @@ bool DataManager::IsCardDeclarable(const CardDataC* cd, const uint64_t* opcode_l
 #undef UNARY_OP_OP
 #undef GET_OP
 
-inline bool is_skill(uint32_t type) {
-	return (type & (TYPE_SKILL | TYPE_ACTION));
-}
-inline bool check_both_skills(uint32_t type1, uint32_t type2) {
-	return is_skill(type1) && is_skill(type2);
-}
-inline bool check_either_skills(uint32_t type1, uint32_t type2) {
-	return is_skill(type1) || is_skill(type2);
-}
 static constexpr uint32_t monster_spell_trap = TYPE_MONSTER | TYPE_SPELL | TYPE_TRAP;
 static constexpr uint32_t not_monster_spell_trap = ~monster_spell_trap;
 static constexpr uint32_t spsummon_proc_types = TYPE_LINK | TYPE_XYZ | TYPE_SYNCHRO | TYPE_RITUAL | TYPE_FUSION;
@@ -682,19 +682,7 @@ inline bool check_codes(const CardDataC* p1, const CardDataC* p2) {
 	return p1->code < p2->code;
 }
 
-inline bool check_skills(const CardDataC* p1, const CardDataC* p2) {
-	if(check_both_skills(p1->type, p2->type)) {
-		if((p1->type & not_monster_spell_trap) == (p2->type & not_monster_spell_trap)) {
-			return check_codes(p1, p2);
-		} else {
-			return (p1->type & not_monster_spell_trap) < (p2->type & not_monster_spell_trap);
-		}
-	}
-	return is_skill(p2->type);
-}
 static bool card_sorter(const CardDataC* p1, const CardDataC* p2, bool(*sortoop)(const CardDataC* p1, const CardDataC* p2)) {
-	if(check_either_skills(p1->type, p2->type))
-		return check_skills(p1, p2);
 	if((p1->type & monster_spell_trap) != (p2->type & monster_spell_trap))
 		return (p1->type & monster_spell_trap) < (p2->type & monster_spell_trap);
 	if((p1->type & monster_spell_trap) == TYPE_MONSTER) {

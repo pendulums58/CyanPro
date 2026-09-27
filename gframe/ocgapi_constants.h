@@ -44,7 +44,6 @@
 #define TYPE_TUNER       0x1000
 #define TYPE_SYNCHRO     0x2000
 #define TYPE_TOKEN       0x4000
-#define TYPE_MAXIMUM     0x8000
 #define TYPE_QUICKPLAY   0x10000
 #define TYPE_CONTINUOUS  0x20000
 #define TYPE_EQUIP       0x40000
@@ -56,6 +55,14 @@
 #define TYPE_PENDULUM    0x1000000
 #define TYPE_SPSUMMON    0x2000000
 #define TYPE_LINK        0x4000000
+/* ORICA BEGIN */
+#define TYPE_KEY      0x00000008
+#define TYPE_UNLOCKED 0x00008000
+#define TYPE_ACCESS   0x08000000
+#define TYPE_GIFT     0x10000000
+#define TYPE_HIJACK   0x20000000
+#define TYPE_PAIRING  0x40000000
+/* ORICA END */
 
 /* Attributes */
 #define ATTRIBUTE_EARTH  0x01

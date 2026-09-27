@@ -211,13 +211,13 @@ DeckError DeckManager::CheckDeckContent(const Deck& deck, LFList const* lflist, 
 		return ret.type = DeckError::TOOMANYLEGENDS, ret;
 	if(CountLegends(deck.main, TYPE_TRAP) > 1)
 		return ret.type = DeckError::TOOMANYLEGENDS, ret;
-	if(TypeCount(deck.main, TYPE_SKILL) > 1)
-		return ret.type = DeckError::TOOMANYSKILLS, ret;
 	banlist_content_t ccount;
 	if(!lflist)
 		return ret;
 	ret = CheckCards(deck.main, lflist, allowedCards, ccount, [&](const CardDataC* cit)->DeckError {
-		if ((cit->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ)) || (cit->type & TYPE_LINK && cit->type & TYPE_MONSTER))
+		if ((cit->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_ACCESS | TYPE_PAIRING)) || (cit->type & TYPE_LINK && cit->type & TYPE_MONSTER))
+			return { DeckError::EXTRACOUNT };
+		if(cit->type & TYPE_GIFT)
 			return { DeckError::EXTRACOUNT };
 		if(cit->isRitualMonster() && rituals_in_extra)
 			return { DeckError::EXTRACOUNT };
@@ -225,6 +225,8 @@ DeckError DeckManager::CheckDeckContent(const Deck& deck, LFList const* lflist, 
 	});
 	if (ret.type) return ret;
 	ret = CheckCards(deck.extra, lflist, allowedCards, ccount, [&](const CardDataC* cit)->DeckError {
+		if(cit->type & (TYPE_ACCESS | TYPE_PAIRING | TYPE_GIFT))
+			return { DeckError::NONE };
 		if(cit->isRitualMonster()) {
 			if(!rituals_in_extra)
 				return { DeckError::EXTRACOUNT };
@@ -237,10 +239,9 @@ DeckError DeckManager::CheckDeckContent(const Deck& deck, LFList const* lflist, 
 }
 DeckError DeckManager::CheckDeckSize(const Deck& deck, const DeckSizes& sizes) {
 	DeckError ret{ DeckError::NONE };
-	auto skills = TypeCount(deck.main, TYPE_SKILL);
-	if(sizes.main != (deck.main.size() - skills)) {
+	if(sizes.main != deck.main.size()) {
 		ret.type = DeckError::MAINCOUNT;
-		ret.count.current = static_cast<uint32_t>(deck.main.size()) - skills;
+		ret.count.current = static_cast<uint32_t>(deck.main.size());
 		ret.count.minimum = sizes.main.min;
 		ret.count.maximum = sizes.main.max;
 	} else if(sizes.extra != deck.extra.size()) {
@@ -333,7 +334,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, const cardlist_type& mainlist, const 
 	const CardDataC* cd = nullptr;
 	const bool loadalways = !!extralist;
 	auto is_extra_deck_card = [&](auto* card) {
-		if(card->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ))
+		if(card->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_ACCESS | TYPE_PAIRING | TYPE_GIFT))
 			return true;
 		if(card->type & (cd->type & TYPE_LINK && cd->type & TYPE_MONSTER))
 			return true;
@@ -399,13 +400,11 @@ bool DeckManager::LoadSide(Deck& deck, uint32_t* dbuf, uint32_t mainc, uint32_t 
 		pcount[card->code]++;
 	for(auto& card : deck.side)
 		pcount[card->code]++;
-	auto old_skills = TypeCount(deck.main, TYPE_SKILL);
 	auto old_legends_monster = CountLegends(deck.main, TYPE_MONSTER) + CountLegends(deck.extra, TYPE_MONSTER);
 	auto old_legends_spell = CountLegends(deck.main, TYPE_SPELL);
 	auto old_legends_trap = CountLegends(deck.main, TYPE_TRAP);
 	Deck ndeck;
 	LoadDeckFromBuffer(ndeck, dbuf, mainc, sidec, rituals_in_extra ? RITUAL_LOCATION::EXTRA : RITUAL_LOCATION::MAIN);
-	auto new_skills = TypeCount(ndeck.main, TYPE_SKILL);
 	auto new_legends_monster = CountLegends(ndeck.main, TYPE_MONSTER) + CountLegends(ndeck.extra, TYPE_MONSTER);
 	if(new_legends_monster > std::max(old_legends_monster, 1))
 		return false;
@@ -415,12 +414,7 @@ bool DeckManager::LoadSide(Deck& deck, uint32_t* dbuf, uint32_t mainc, uint32_t 
 	auto new_legends_trap = CountLegends(ndeck.main, TYPE_TRAP);
 	if(new_legends_trap > std::max(old_legends_trap, 1))
 		return false;
-	// ideally the check should be only new_skills > 1, but the player might host with don't check deck
-	// and thus have more than 1 skill in the deck, do this check to ensure that the sided deck will
-	// always be valid in such case and prevent softlocking during side decking
-	if(new_skills > std::max(old_skills, 1))
-		return false;
-	if((ndeck.main.size() - new_skills) != (deck.main.size() - old_skills) || ndeck.extra.size() != deck.extra.size())
+	if(ndeck.main.size() != deck.main.size() || ndeck.extra.size() != deck.extra.size())
 		return false;
 	for(auto& card : ndeck.main)
 		ncount[card->code]++;

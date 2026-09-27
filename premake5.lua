@@ -289,11 +289,12 @@ workspace "ygo"
 		defines "NDEBUG"
 
 	filter { "configurations:Release", "action:vs* or system:not windows" }
-		if linktimeoptimization then
-			linktimeoptimization "On"
-		else
-			flags "LinkTimeOptimization"
-		end
+		-- LTO disabled: vcpkg libs compiled with different compiler version
+		-- if linktimeoptimization then
+		-- 	linktimeoptimization "On"
+		-- else
+		-- 	flags "LinkTimeOptimization"
+		-- end
 
 	filter { "configurations:Release", "architecture:x64" }
 		targetdir "bin/x64/release"

@@ -55,7 +55,6 @@ public:
 		CARD_TYPE_FILTER_MONSTER,
 		CARD_TYPE_FILTER_SPELL,
 		CARD_TYPE_FILTER_TRAP,
-		CARD_TYPE_FILTER_SKILL,
 	};
 	struct SearchParameter {
 		std::vector<epro::wstringview> tokens;
@@ -129,7 +128,6 @@ private:
 	uint16_t main_and_extra_legend_count_monster;
 	uint16_t main_legend_count_spell;
 	uint16_t main_legend_count_trap;
-	uint16_t main_skill_count;
 	Deck current_deck;
 public:
 	uint32_t hovered_code;

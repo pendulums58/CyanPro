@@ -2868,13 +2868,17 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 		}
 		stDataInfo->setText(text.data());
 	} else {
-		if(cd->type & TYPE_SKILL) { // TYPE_SKILL created by hints
-			// Hack: Race encodes the character for now
-			stInfo->setText(epro::format(L"[{}|{}]", gDataManager->FormatRace(cd->race, true), gDataManager->FormatType(cd->type)).data());
-		} else {
-			stInfo->setText(epro::format(L"[{}]", gDataManager->FormatType(cd->type)).data());
-		}
-		if(cd->type & TYPE_LINK) {
+		stInfo->setText(epro::format(L"[{}]", gDataManager->FormatType(cd->type)).data());
+		if(cd->type & TYPE_GIFT) {
+			if(cd->attack < 0 && cd->defense < 0)
+				stDataInfo->setText(L"?/?");
+			else if(cd->attack < 0)
+				stDataInfo->setText(epro::format(L"?/{}", cd->defense).data());
+			else if(cd->defense < 0)
+				stDataInfo->setText(epro::format(L"{}/?", cd->attack).data());
+			else
+				stDataInfo->setText(epro::format(L"{}/{}", cd->attack, cd->defense).data());
+		} else if(cd->type & TYPE_LINK) {
 			stDataInfo->setText(epro::format(L"LINK {}   {}", cd->level, gDataManager->FormatLinkMarker(cd->link_marker)).data());
 		} else
 			stDataInfo->setText(L"");
@@ -3361,12 +3365,11 @@ void Game::ReloadCBSortType() {
 	}
 }
 void Game::ReloadCBCardType() {
-	static constexpr std::array<std::pair<uint32_t, DeckBuilder::CARD_TYPE_FILTER>, 5> items{ {
+	static constexpr std::array<std::pair<uint32_t, DeckBuilder::CARD_TYPE_FILTER>, 4> items{ {
 		{1310, DeckBuilder::CARD_TYPE_FILTER_ALL},
 		{1312, DeckBuilder::CARD_TYPE_FILTER_MONSTER},
 		{1313, DeckBuilder::CARD_TYPE_FILTER_SPELL},
 		{1314, DeckBuilder::CARD_TYPE_FILTER_TRAP},
-		{1077, DeckBuilder::CARD_TYPE_FILTER_SKILL},
 	} };
 	cbCardType->clear();
 	for(const auto& [stringid, val] : items) {
@@ -3378,7 +3381,6 @@ void Game::ReloadCBCardType2() {
 	cbCardType2->setEnabled(true);
 	switch (cbCardType->getItemData(cbCardType->getSelected())) {
 	case DeckBuilder::CARD_TYPE_FILTER_ALL:
-	case DeckBuilder::CARD_TYPE_FILTER_SKILL:
 		cbCardType2->setEnabled(false);
 		cbCardType2->addItem(gDataManager->GetSysString(1310).data(), 0);
 		break;
@@ -3402,7 +3404,10 @@ void Game::ReloadCBCardType2() {
 		cbCardType2->addItem(gDataManager->GetSysString(1059).data(), TYPE_MONSTER + TYPE_SPIRIT);
 		cbCardType2->addItem(gDataManager->GetSysString(1071).data(), TYPE_MONSTER + TYPE_FLIP);
 		cbCardType2->addItem(gDataManager->GetSysString(1072).data(), TYPE_MONSTER + TYPE_TOON);
-		cbCardType2->addItem(gDataManager->GetSysString(1065).data(), TYPE_MONSTER + TYPE_MAXIMUM);
+		cbCardType2->addItem(gDataManager->GetSysString(1090).data(), TYPE_MONSTER + TYPE_ACCESS);
+		cbCardType2->addItem(gDataManager->GetSysString(1091).data(), TYPE_MONSTER + TYPE_HIJACK);
+		cbCardType2->addItem(gDataManager->GetSysString(1092).data(), TYPE_MONSTER + TYPE_PAIRING);
+		cbCardType2->addItem(gDataManager->GetSysString(1094).data(), TYPE_MONSTER + TYPE_KEY);
 		break;
 	case DeckBuilder::CARD_TYPE_FILTER_SPELL:
 		cbCardType2->addItem(gDataManager->GetSysString(1080).data(), 0);
@@ -3413,6 +3418,7 @@ void Game::ReloadCBCardType2() {
 		cbCardType2->addItem(gDataManager->GetSysString(1068).data(), TYPE_SPELL + TYPE_EQUIP);
 		cbCardType2->addItem(gDataManager->GetSysString(1069).data(), TYPE_SPELL + TYPE_FIELD);
 		cbCardType2->addItem(gDataManager->GetSysString(1076).data(), TYPE_SPELL + TYPE_LINK);
+		cbCardType2->addItem(gDataManager->GetSysString(1093).data(), TYPE_SPELL + TYPE_GIFT);
 		break;
 	case DeckBuilder::CARD_TYPE_FILTER_TRAP:
 		cbCardType2->addItem(gDataManager->GetSysString(1080).data(), 0);

@@ -353,9 +353,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_SIDE_OK: {
-				auto old_skills = DeckManager::TypeCount(gdeckManager->pre_deck.main, TYPE_SKILL);
-				auto new_skills = DeckManager::TypeCount(current_deck.main, TYPE_SKILL);
-				if((current_deck.main.size() - new_skills) != (gdeckManager->pre_deck.main.size() - old_skills)
+				if(current_deck.main.size() != gdeckManager->pre_deck.main.size()
 				   || current_deck.extra.size() != gdeckManager->pre_deck.extra.size()) {
 					mainGame->PopupMessage(gDataManager->GetSysString(1408));
 					break;
@@ -531,8 +529,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->ebStar->setText(L"");
 				mainGame->ebScale->setText(L"");
 				switch(mainGame->cbCardType->getItemData(mainGame->cbCardType->getSelected())) {
-				case CARD_TYPE_FILTER_ALL:
-				case CARD_TYPE_FILTER_SKILL: {
+				case CARD_TYPE_FILTER_ALL: {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
@@ -575,7 +572,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			case COMBOBOX_SECONDTYPE:
 			case COMBOBOX_OTHER_FILT: {
 				if (id==COMBOBOX_SECONDTYPE && mainGame->cbCardType->getItemData(mainGame->cbCardType->getSelected()) == CARD_TYPE_FILTER_MONSTER) {
-					if (mainGame->cbCardType2->getSelected() == 8) {
+					if (mainGame->cbCardType2->getItemData(mainGame->cbCardType2->getSelected()) == TYPE_MONSTER + TYPE_LINK) {
 						mainGame->ebDefense->setEnabled(false);
 						mainGame->ebDefense->setText(L"");
 					} else {
@@ -1241,11 +1238,6 @@ bool DeckBuilder::CheckCardProperties(const CardDataM& data) {
 			return false;
 		break;
 	}
-	case CARD_TYPE_FILTER_SKILL: {
-		if(!(data._data.type & TYPE_SKILL))
-			return false;
-		break;
-	}
 	}
 	if(filter_effect && !(data._data.category & filter_effect))
 		return false;
@@ -1438,7 +1430,6 @@ void DeckBuilder::ClearDeck() {
 	main_and_extra_legend_count_monster = 0;
 	main_legend_count_spell = 0;
 	main_legend_count_trap = 0;
-	main_skill_count = 0;
 	main_monster_count = 0;
 	main_spell_count = 0;
 	main_trap_count = 0;
@@ -1457,7 +1448,6 @@ void DeckBuilder::RefreshLimitationStatus() {
 	main_and_extra_legend_count_monster = DeckManager::CountLegends(current_deck.main, TYPE_MONSTER) + DeckManager::CountLegends(current_deck.extra, TYPE_MONSTER);
 	main_legend_count_spell = DeckManager::CountLegends(current_deck.main, TYPE_SPELL);
 	main_legend_count_trap = DeckManager::CountLegends(current_deck.main, TYPE_TRAP);
-	main_skill_count = DeckManager::TypeCount(current_deck.main, TYPE_SKILL);
 	main_monster_count = DeckManager::TypeCount(current_deck.main, TYPE_MONSTER);
 	main_spell_count = DeckManager::TypeCount(current_deck.main, TYPE_SPELL);
 	main_trap_count = DeckManager::TypeCount(current_deck.main, TYPE_TRAP);
@@ -1491,8 +1481,6 @@ void DeckBuilder::RefreshLimitationStatusOnRemoved(const CardDataC* card, DeckTy
 				if(card->ot & SCOPE_LEGEND)
 					--main_legend_count_trap;
 			}
-			if(card->type & TYPE_SKILL)
-				--main_skill_count;
 			break;
 		}
 		case DeckType::EXTRA:
@@ -1542,8 +1530,6 @@ void DeckBuilder::RefreshLimitationStatusOnAdded(const CardDataC* card, DeckType
 				if(card->ot & SCOPE_LEGEND)
 					++main_legend_count_trap;
 			}
-			if(card->type & TYPE_SKILL)
-				++main_skill_count;
 			break;
 		}
 		case DeckType::EXTRA:
@@ -1582,9 +1568,11 @@ bool DeckBuilder::push_main(const CardDataC* pointer, int seq, bool forced) {
 		} else if(pointer->isRush() && !forced)
 			return false;
 	}
-	if(pointer->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ))
+	if(pointer->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_ACCESS | TYPE_PAIRING))
 		return false;
 	if((pointer->type & (TYPE_LINK | TYPE_SPELL)) == TYPE_LINK)
+		return false;
+	if(pointer->type & TYPE_GIFT)
 		return false;
 	auto& container = current_deck.main;
 	if(!forced && !mainGame->is_siding) {
@@ -1593,8 +1581,6 @@ bool DeckBuilder::push_main(const CardDataC* pointer, int seq, bool forced) {
 		if(main_legend_count_spell >= 1 && (pointer->ot & SCOPE_LEGEND) && (pointer->type & TYPE_SPELL))
 			return false;
 		if(main_legend_count_trap >= 1 && (pointer->ot & SCOPE_LEGEND) && (pointer->type & TYPE_TRAP))
-			return false;
-		if(main_skill_count >= 1 && (pointer->type & TYPE_SKILL))
 			return false;
 		if(container.size() >= 60)
 			return false;
@@ -1608,7 +1594,10 @@ bool DeckBuilder::push_main(const CardDataC* pointer, int seq, bool forced) {
 	return true;
 }
 bool DeckBuilder::push_extra(const CardDataC* pointer, int seq, bool forced) {
-	if(pointer->isRitualMonster()) {
+	if(pointer->type & TYPE_GIFT) {
+		// Gift is a spell that goes to extra deck
+	} else if(pointer->type & (TYPE_ACCESS | TYPE_PAIRING)) {
+	} else if(pointer->isRitualMonster()) {
 		if(mainGame->is_siding) {
 			if(!mainGame->dInfo.HasFieldFlag(DUEL_EXTRA_DECK_RITUAL))
 				return false;

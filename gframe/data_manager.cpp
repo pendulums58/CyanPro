@@ -668,7 +668,7 @@ bool DataManager::IsCardDeclarable(const CardDataC* cd, const uint64_t* opcode_l
 static constexpr uint32_t monster_spell_trap = TYPE_MONSTER | TYPE_SPELL | TYPE_TRAP;
 static constexpr uint32_t not_monster_spell_trap = ~monster_spell_trap;
 static constexpr uint32_t spsummon_proc_types = TYPE_LINK | TYPE_XYZ | TYPE_SYNCHRO | TYPE_RITUAL | TYPE_FUSION
-                                                | TYPE_ACCESS | TYPE_PAIRING;
+                                                | TYPE_PAIRING;
 
 inline bool check_codes(const CardDataC* p1, const CardDataC* p2) {
 	if(p1->alias == p2->code)
@@ -694,6 +694,8 @@ static bool card_sorter(const CardDataC* p1, const CardDataC* p2, bool(*sortoop)
 	return check_codes(p1, p2);
 }
 inline uint32_t get_monster_card_type(uint32_t type) {
+	if(type & TYPE_ACCESS)
+		return 0x1000001;
 	if(type & spsummon_proc_types)
 		return type & (spsummon_proc_types | TYPE_MONSTER);
 	if(type & TYPE_KEY)

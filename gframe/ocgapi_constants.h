@@ -64,6 +64,13 @@
 #define TYPE_PAIRING  0x40000000
 /* ORICA END */
 
+#ifdef __cplusplus
+inline bool is_extra_deck_type(uint32_t type) {
+	return (type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_LINK
+	              | TYPE_ACCESS | TYPE_PAIRING | TYPE_GIFT)) != 0;
+}
+#endif
+
 /* Attributes */
 #define ATTRIBUTE_EARTH  0x01
 #define ATTRIBUTE_WATER  0x02

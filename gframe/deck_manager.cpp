@@ -336,7 +336,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, const cardlist_type& mainlist, const 
 	auto is_extra_deck_card = [&](auto* card) {
 		if(card->type & (TYPE_FUSION | TYPE_SYNCHRO | TYPE_XYZ | TYPE_ACCESS | TYPE_PAIRING | TYPE_GIFT))
 			return true;
-		if(card->type & (cd->type & TYPE_LINK && cd->type & TYPE_MONSTER))
+		if((card->type & TYPE_LINK) && (card->type & TYPE_MONSTER))
 			return true;
 		if(card->isRitualMonster()) {
 			if(rituals_in_extra == RITUAL_LOCATION::DEFAULT) {

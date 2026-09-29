@@ -51,15 +51,10 @@ card.cpp:323:56: conversion from ‘lua_Integer’ {aka ‘long long int’} to 
 card.cpp:3264:53: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘int32_t’ {aka ‘int’} may change value
 card.cpp:344:48: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
 card.cpp:3519:53: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘int32_t’ {aka ‘int’} may change value
-card.cpp:3550:33: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:3557:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-card.cpp:3667:33: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:3671:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-card.cpp:3690:33: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:3694:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-card.cpp:3713:33: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:3717:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-card.cpp:3736:33: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:3740:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 card.cpp:383:56: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘std::set<unsigned int>::value_type’ {aka ‘unsigned int’} may change value
 card.cpp:385:65: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘std::set<unsigned int>::key_type’ {aka ‘unsigned int’} may change value
@@ -161,7 +156,6 @@ field.cpp:905:36: conversion from ‘int32_t’ {aka ‘int’} to ‘uint8_t’
 libcard.cpp:1435:106: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libcard.cpp:1446:104: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libcard.cpp:1999:34: conversion from ‘long unsigned int’ to ‘int32_t’ {aka ‘int’} may change value
-libcard.cpp:2108:88: conversion from ‘int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libcard.cpp:554:55: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
 libcard.cpp:622:53: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘std::set<unsigned int>::value_type’ {aka ‘unsigned int’} may change value
 libcard.cpp:624:62: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘std::set<unsigned int>::key_type’ {aka ‘unsigned int’} may change value
@@ -171,7 +165,6 @@ libcard.cpp:79:65: conversion from ‘lua_Integer’ {aka ‘long long int’} t
 libdebug.cpp:58:59: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libdebug.cpp:65:88: conversion from ‘int’ to ‘short unsigned int’ may change value
 libdebug.cpp:69:88: conversion from ‘int’ to ‘short unsigned int’ may change value
-libdebug.cpp:75:50: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libdebug.cpp:75:60: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libduel.cpp:1043:50: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
 libduel.cpp:1140:54: conversion from ‘unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
@@ -179,10 +172,6 @@ libduel.cpp:1143:54: conversion from ‘unsigned int’ to ‘uint8_t’ {aka �
 libduel.cpp:1155:129: conversion from ‘unsigned int’ to ‘uint16_t’ {aka ‘short unsigned int’} may change value
 libduel.cpp:1400:35: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libduel.cpp:1415:35: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-libduel.cpp:1828:54: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
-libduel.cpp:1828:65: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
-libduel.cpp:1845:54: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
-libduel.cpp:1845:65: conversion from ‘short unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libduel.cpp:2478:47: conversion from ‘scriptlib::EnableIfIntegral<unsigned int>’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libduel.cpp:2525:47: conversion from ‘scriptlib::EnableIfIntegral<unsigned int>’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 libduel.cpp:2877:50: conversion from ‘unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
@@ -229,7 +218,6 @@ operations.cpp:2588:110: conversion from ‘int32_t’ {aka ‘int’} to ‘uin
 operations.cpp:2733:101: conversion from ‘unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:2795:62: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘int32_t’ {aka ‘int’} may change value
 operations.cpp:279:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-operations.cpp:279:56: conversion from ‘uint16_t’ {aka ‘short unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:279:69: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:2885:69: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:2908:100: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
@@ -241,23 +229,18 @@ operations.cpp:330:46: conversion from ‘uint32_t’ {aka ‘unsigned int’} t
 operations.cpp:3313:38: conversion from ‘long long int’ to ‘uint32_t’ {aka ‘unsigned int’} may change value
 operations.cpp:3315:57: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:331:41: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-operations.cpp:331:49: conversion from ‘uint16_t’ {aka ‘short unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:331:62: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:3332:53: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:3354:97: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:3621:109: conversion from ‘unsigned int’ to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:3863:77: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘int32_t’ {aka ‘int’} may change value
-operations.cpp:3980:56: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4060:77: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘int32_t’ {aka ‘int’} may change value
 operations.cpp:4317:95: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
-operations.cpp:4364:64: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4365:64: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4374:64: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-operations.cpp:4381:64: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4382:64: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:465:29: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint16_t’ {aka ‘short unsigned int’} may change value
 operations.cpp:4767:74: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-operations.cpp:4769:65: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4902:62: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 operations.cpp:4968:73: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘signed char’ may change value
 operations.cpp:5057:68: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
@@ -306,11 +289,9 @@ processor.cpp:1881:50: conversion from ‘int32_t’ {aka ‘int’} to ‘uint1
 processor.cpp:1903:60: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint16_t’ {aka ‘short unsigned int’} may change value
 processor.cpp:2330:120: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 processor.cpp:2524:58: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
-processor.cpp:2528:91: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-processor.cpp:2528:97: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
+processor.cpp:2528:120: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 processor.cpp:2545:58: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
-processor.cpp:2549:101: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
-processor.cpp:2549:107: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
+processor.cpp:2549:130: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 processor.cpp:2900:128: conversion from ‘uint32_t’ {aka ‘unsigned int’} to ‘uint8_t’ {aka ‘unsigned char’} may change value
 processor.cpp:2950:40: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value
 processor.cpp:2957:48: conversion from ‘lua_Integer’ {aka ‘long long int’} to ‘uint32_t’ {aka ‘unsigned int’} may change value

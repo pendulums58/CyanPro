@@ -44,7 +44,7 @@ public:
 };
 struct loc_info {
 	uint8_t controler;
-	uint8_t location;
+	uint16_t location;
 	uint32_t sequence;
 	uint32_t position;
 };

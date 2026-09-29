@@ -188,7 +188,7 @@ void Query::GenerateBuffer(std::vector<uint8_t>& buffer, bool is_for_public_buff
 			case QUERY_EQUIP_CARD: {
 				auto& info = (cur_flag == QUERY_REASON_CARD) ? reason_card : equip_card;
 				BufferIO::insert_value<uint8_t>(buffer, info.controler);
-				BufferIO::insert_value<uint8_t>(buffer, info.location);
+				BufferIO::insert_value<uint8_t>(buffer, static_cast<uint8_t>(info.location));
 				BufferIO::insert_value<uint32_t>(buffer, info.sequence);
 				BufferIO::insert_value<uint32_t>(buffer, info.position);
 				break;
@@ -197,7 +197,7 @@ void Query::GenerateBuffer(std::vector<uint8_t>& buffer, bool is_for_public_buff
 				BufferIO::insert_value<uint32_t>(buffer, static_cast<uint32_t>(target_cards.size()));
 				for(auto& info : target_cards) {
 					BufferIO::insert_value<uint8_t>(buffer, info.controler);
-					BufferIO::insert_value<uint8_t>(buffer, info.location);
+					BufferIO::insert_value<uint8_t>(buffer, static_cast<uint8_t>(info.location));
 					BufferIO::insert_value<uint32_t>(buffer, info.sequence);
 					BufferIO::insert_value<uint32_t>(buffer, info.position);
 				}

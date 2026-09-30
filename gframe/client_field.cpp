@@ -68,6 +68,7 @@ void ClientField::Clear() {
 	}
 	ClearVector(limbo_temp);
 	ClearVector(overlay_cards);
+	ClearVector(admin_cards);
 	if(skills[0]) {
 		delete skills[0];
 		skills[0] = nullptr;
@@ -77,6 +78,7 @@ void ClientField::Clear() {
 		skills[1] = nullptr;
 	}
 	overlay_cards.clear();
+	admin_cards.clear();
 	extra_p_count[0] = 0;
 	extra_p_count[1] = 0;
 	player_desc_hints[0].clear();
@@ -160,6 +162,15 @@ std::vector<ClientCard*>* ClientField::GetList(uint8_t location, uint8_t control
 	return nullptr;
 }
 ClientCard* ClientField::GetCard(uint8_t controler, uint16_t location, size_t sequence, size_t sub_seq) {
+	if(location & LOCATION_ADMIN) {
+		auto lst = GetList(location & ~LOCATION_ADMIN, controler);
+		if(!lst || sequence >= lst->size())
+			return 0;
+		ClientCard* scard = (*lst)[sequence];
+		if(scard && scard->adminCard)
+			return scard->adminCard;
+		return 0;
+	}
 	bool is_xyz = (location & LOCATION_OVERLAY) != 0;
 	auto lst = GetList(location & (~LOCATION_OVERLAY), controler);
 	if(!lst)
@@ -657,6 +668,7 @@ void ClientField::ReplaySwap() {
 		reset(skills[p]);
 	}
 	resetloc(overlay_cards);
+	resetloc(admin_cards);
 	mainGame->dInfo.isFirst = !mainGame->dInfo.isFirst;
 	mainGame->dInfo.isTeam1 = !mainGame->dInfo.isTeam1;
 	mainGame->dInfo.isReplaySwapped = !mainGame->dInfo.isReplaySwapped;
@@ -694,6 +706,7 @@ void ClientField::RefreshAllCards() {
 		refresh(skills[p]);
 	}
 	refreshloc(overlay_cards);
+	refreshloc(admin_cards);
 	for(auto& chit : chains)
 		chit.UpdateDrawCoordinates();
 	mainGame->should_refresh_hands = true;
@@ -799,7 +812,7 @@ void ClientField::GetCardDrawCoordinates(ClientCard* pcard, irr::core::vector3df
 		return (pos[0].Pos.Y + pos[2].Pos.Y) / 2.0f;
 	};
 	if(!pcard->location) return;
-	const int& controler = pcard->overlayTarget ? pcard->overlayTarget->controler : pcard->controler;
+	const int& controler = pcard->overlayTarget ? pcard->overlayTarget->controler : pcard->adminTarget ? pcard->adminTarget->controler : pcard->controler;
 	const int& sequence = pcard->sequence;
 	const int& location = pcard->location;
 	auto GetPos = [&]()->const irr::video::S3DVertex* {
@@ -818,7 +831,15 @@ void ClientField::GetCardDrawCoordinates(ClientCard* pcard, irr::core::vector3df
 				return matManager.vFieldMzone[controler][pcard->overlayTarget->sequence];
 			if(pcard->overlayTarget->location == LOCATION_SZONE)
 				return matManager.getSzone()[controler][pcard->overlayTarget->sequence];
-			[[fallthrough]];
+			return nullptr;
+		case LOCATION_ADMIN:
+			if(!pcard->adminTarget || controler > 1)
+				return nullptr;
+			if(pcard->adminTarget->location == LOCATION_MZONE)
+				return matManager.vFieldMzone[controler][pcard->adminTarget->sequence];
+			if(pcard->adminTarget->location == LOCATION_SZONE)
+				return matManager.getSzone()[controler][pcard->adminTarget->sequence];
+			return nullptr;
 		default: return nullptr;
 		}
 	};
@@ -837,9 +858,11 @@ void ClientField::GetCardDrawCoordinates(ClientCard* pcard, irr::core::vector3df
 				*r = (pcard->position & POS_DEFENSE) ? oppoDEF : oppoATK;
 		} else if (location == LOCATION_OVERLAY)
 			*r = (pcard->overlayTarget->controler == 0) ? selfATK : oppoATK;
+		else if (location == LOCATION_ADMIN)
+			*r = (pcard->adminTarget->controler == 0) ? selfATK : oppoATK;
 		else
 			*r = (controler == 0) ? selfATK : oppoATK;
-		if(((location & (LOCATION_GRAVE | LOCATION_OVERLAY)) == 0) && ((location == LOCATION_DECK && deck_reversed == pcard->is_reversed) ||
+		if(((location & (LOCATION_GRAVE | LOCATION_OVERLAY | LOCATION_ADMIN)) == 0) && ((location == LOCATION_DECK && deck_reversed == pcard->is_reversed) ||
 			(location != LOCATION_DECK && pcard->position & POS_FACEDOWN))) {
 			*r += facedown;
 			if(location == LOCATION_MZONE && pcard->position & POS_DEFENSE)
@@ -860,6 +883,13 @@ void ClientField::GetCardDrawCoordinates(ClientCard* pcard, irr::core::vector3df
 					*t = { t->X - 0.12f + 0.06f * sequence, t->Y + 0.06f, 0.005f + pcard->sequence * 0.0001f };
 				else
 					*t = { t->X + 0.12f - 0.06f * sequence, t->Y - 0.06f, 0.005f + pcard->sequence * 0.0001f };
+				break;
+			}
+			case LOCATION_ADMIN: {
+				if(controler == 0)
+					*t = { t->X + 0.12f, t->Y - 0.06f, 0.005f };
+				else
+					*t = { t->X - 0.12f, t->Y + 0.06f, 0.005f };
 				break;
 			}
 		}

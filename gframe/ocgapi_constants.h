@@ -17,6 +17,7 @@
 #define LOCATION_REMOVED 0x20
 #define LOCATION_EXTRA   0x40
 #define LOCATION_OVERLAY 0x80
+#define LOCATION_ADMIN   0x2000
 #define LOCATION_ONFIELD (LOCATION_MZONE | LOCATION_SZONE)
 
 /* Positions */
@@ -313,6 +314,8 @@ inline bool is_extra_deck_type(uint32_t type) {
 #define MSG_MATCH_KILL           170
 #define MSG_CUSTOM_MSG           180
 #define MSG_REMOVE_CARDS         190
+#define MSG_SET_ADMIN            200
+#define MSG_REMOVE_ADMIN         201
 
 /* Duel Hints */
 #define HINT_EVENT      1

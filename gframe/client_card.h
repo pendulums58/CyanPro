@@ -66,6 +66,8 @@ public:
 	uint32_t cmdFlag;
 	ClientCard* overlayTarget;
 	std::vector<ClientCard*> overlayed;
+	ClientCard* adminTarget;
+	ClientCard* adminCard;
 	ClientCard* equipTarget;
 	std::set<ClientCard*> equipped;
 	std::set<ClientCard*> cardTarget;

@@ -327,6 +327,8 @@ void Game::DrawLinkedZones(ClientCard* pcard) {
 void Game::DrawCards() {
 	for(auto& pcard : dField.overlay_cards)
 		DrawCard(pcard);
+	for(auto& pcard : dField.admin_cards)
+		DrawCard(pcard);
 	for(int p = 0; p < 2; ++p) {
 		for(auto& pcard : dField.mzone[p])
 			if(pcard)

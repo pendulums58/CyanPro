@@ -85,6 +85,10 @@ int ReplayMode::ReplayThread() {
 	mainGame->dInfo.isHandTest = !!(replay_header.base.flag & REPLAY_HAND_TEST);
 	mainGame->dInfo.compat_mode = !(replay_header.base.flag & REPLAY_LUA64);
 	mainGame->dInfo.legacy_race_size = GET_CORE_VERSION_MAJOR(replay_header.base.version) < 10;
+	if(GET_CORE_VERSION_MINOR(replay_header.base.version) < 2) {
+		EndDuel();
+		return 0;
+	}
 	mainGame->dInfo.team1 = cur_replay.GetPlayersCount(0);
 	mainGame->dInfo.team2 = cur_replay.GetPlayersCount(1);
 	mainGame->dInfo.current_player[0] = 0;
@@ -264,6 +268,8 @@ bool ReplayMode::ReplayAnalyze(const CoreUtils::Packet& p) {
 		case MSG_RANDOM_SELECTED:
 		case MSG_EQUIP:
 		case MSG_UNEQUIP:
+		case MSG_SET_ADMIN:
+		case MSG_REMOVE_ADMIN:
 		case MSG_CARD_TARGET:
 		case MSG_CANCEL_TARGET:
 		case MSG_BATTLE:

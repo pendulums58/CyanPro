@@ -3079,6 +3079,8 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 			if(previous.location & LOCATION_OVERLAY) {
 				auto olcard = mainGame->dField.GetCard(previous.controler, (previous.location & (~LOCATION_OVERLAY)) & 0xff, previous.sequence);
 				pcard = olcard->overlayed[previous.position];
+			} else if(previous.location & LOCATION_ADMIN) {
+				pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
 			} else
 				pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
 			if (code != 0 && pcard->code != code)
@@ -3097,13 +3099,54 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				pcard->overlayTarget->overlayed.erase(pcard->overlayTarget->overlayed.begin() + pcard->sequence);
 				pcard->overlayTarget = 0;
 				mainGame->dField.overlay_cards.erase(pcard);
+			} else if(pcard->adminTarget) {
+				pcard->adminTarget->adminCard = nullptr;
+				pcard->adminTarget = nullptr;
+				mainGame->dField.admin_cards.erase(pcard);
 			} else
 				mainGame->dField.RemoveCard(previous.controler, previous.location, previous.sequence);
 			if(!mainGame->dInfo.isCatchingUp && pcard == mainGame->dField.hovered_card)
 				mainGame->dField.hovered_card = nullptr;
 			delete pcard;
 		} else {
-			if (!(previous.location & LOCATION_OVERLAY) && !(current.location & LOCATION_OVERLAY)) {
+			if(current.location & LOCATION_ADMIN) {
+				ClientCard* pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
+				if(code != 0 && pcard->code != code)
+					pcard->SetCode(code);
+				pcard->counters.clear();
+				pcard->ClearTarget();
+				pcard->is_showtarget = false;
+				pcard->is_showchaintarget = false;
+				mainGame->dField.RemoveCard(previous.controler, previous.location, previous.sequence);
+				ClientCard* host = mainGame->dField.GetCard(current.controler, current.location & ~LOCATION_ADMIN, current.sequence);
+				pcard->adminTarget = host;
+				host->adminCard = pcard;
+				mainGame->dField.admin_cards.insert(pcard);
+				pcard->location = LOCATION_ADMIN;
+				pcard->sequence = 0;
+				pcard->controler = current.controler;
+				if(!mainGame->dInfo.isCatchingUp) {
+					mainGame->dField.MoveCard(pcard, 10);
+					if(previous.location == LOCATION_HAND) {
+						for(const auto& hcard : mainGame->dField.hand[previous.controler])
+							mainGame->dField.MoveCard(hcard, 10);
+					}
+					mainGame->WaitFrameSignal(5, lock);
+				}
+			} else if(previous.location & LOCATION_ADMIN) {
+				ClientCard* pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
+				if(pcard->adminTarget) {
+					pcard->adminTarget->adminCard = nullptr;
+					pcard->adminTarget = nullptr;
+				}
+				mainGame->dField.admin_cards.erase(pcard);
+				pcard->position = current.position;
+				mainGame->dField.AddCard(pcard, current.controler, current.location, current.sequence);
+				if(!mainGame->dInfo.isCatchingUp) {
+					mainGame->dField.MoveCard(pcard, 10);
+					mainGame->WaitFrameSignal(5, lock);
+				}
+			} else if (!(previous.location & LOCATION_OVERLAY) && !(current.location & LOCATION_OVERLAY)) {
 				ClientCard* pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
 				if (pcard->code != code && (code != 0 || current.location == LOCATION_EXTRA))
 					pcard->SetCode(code);
@@ -4056,6 +4099,16 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				delete pcard;
 			}
 		}
+		return true;
+	}
+	// 관계 설정은 MSG_MOVE 가 한다. 이 메시지는 정보용이며 바이트만 소비한다.
+	case MSG_SET_ADMIN: {
+		CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
+		CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
+		return true;
+	}
+	case MSG_REMOVE_ADMIN: {
+		CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
 		return true;
 	}
 	case MSG_TAG_SWAP: {

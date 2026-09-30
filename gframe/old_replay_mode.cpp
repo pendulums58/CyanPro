@@ -270,7 +270,7 @@ namespace ygo {
 		}
 		return true;
 	}
-	void ReplayMode::ReplayRefresh(uint8_t player, uint8_t location, uint32_t flag) {
+	void ReplayMode::ReplayRefresh(uint8_t player, uint16_t location, uint32_t flag) {
 		uint32_t len = 0;
 		OCG_QueryInfo info{ flag, player, location };
 		auto buff = static_cast<uint8_t*>(pduel->DuelQueryLocation(&len, &info));
@@ -283,7 +283,7 @@ namespace ygo {
 			for(int loc = LOCATION_HAND; loc != LOCATION_GRAVE; loc *= 2)
 				ReplayRefresh(p, loc, flag);
 	}
-	void ReplayMode::ReplayRefreshSingle(uint8_t player, uint8_t location, uint32_t sequence, uint32_t flag) {
+	void ReplayMode::ReplayRefreshSingle(uint8_t player, uint16_t location, uint32_t sequence, uint32_t flag) {
 		uint32_t len = 0;
 		OCG_QueryInfo info{ flag, player, location, sequence };
 		auto buff = static_cast<uint8_t*>(pduel->DuelQuery(&len, &info));

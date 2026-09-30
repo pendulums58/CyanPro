@@ -1366,11 +1366,11 @@ void GenericDuel::RefreshGrave(uint8_t player, uint32_t flag) {
 void GenericDuel::RefreshExtra(uint8_t player, uint32_t flag) {
 	RefreshLocation(player, flag, LOCATION_EXTRA);
 }
-void GenericDuel::RefreshLocation(uint8_t player, uint32_t flag, uint8_t location) {
+void GenericDuel::RefreshLocation(uint8_t player, uint32_t flag, uint16_t location) {
 	std::vector<uint8_t> buffer;
 	BufferIO::insert_value<uint8_t>(buffer, MSG_UPDATE_DATA);
 	BufferIO::insert_value<uint8_t>(buffer, player);
-	BufferIO::insert_value<uint8_t>(buffer, location);
+	BufferIO::insert_value<uint16_t>(buffer, location);
 	uint32_t len = 0;
 	OCG_QueryInfo info{ flag, player, location };
 	auto* buff = static_cast<uint8_t*>(pduel->DuelQueryLocation(&len, &info));
@@ -1379,12 +1379,12 @@ void GenericDuel::RefreshLocation(uint8_t player, uint32_t flag, uint8_t locatio
 	CoreUtils::QueryStream query(buff);
 	query.GenerateBuffer(buffer, false);
 	replay_stream.emplace_back(buffer.data(), buffer.size() - 1);
-	buffer.resize(3);
+	buffer.resize(4);
 	query.GenerateBuffer(buffer, true);
 	NetServer::SendBufferToPlayer(nullptr, STOC_GAME_MSG, buffer);
 	for(auto& dueler : (player == 0) ? players.home : players.opposing)
 		NetServer::ReSendToPlayer(dueler);
-	buffer.resize(3);
+	buffer.resize(4);
 	query.GeneratePublicBuffer(buffer);
 	NetServer::SendBufferToPlayer(nullptr, STOC_GAME_MSG, buffer);
 	for(auto& dueler : (player == 1) ? players.home : players.opposing)
@@ -1393,11 +1393,11 @@ void GenericDuel::RefreshLocation(uint8_t player, uint32_t flag, uint8_t locatio
 		NetServer::ReSendToPlayer(*pit);
 	packets_cache.emplace_back(buffer.data(), buffer.size());
 }
-void GenericDuel::RefreshSingle(uint8_t player, uint8_t location, uint8_t sequence, uint32_t flag) {
+void GenericDuel::RefreshSingle(uint8_t player, uint16_t location, uint8_t sequence, uint32_t flag) {
 	std::vector<uint8_t> buffer;
 	BufferIO::insert_value<uint8_t>(buffer, MSG_UPDATE_CARD);
 	BufferIO::insert_value<uint8_t>(buffer, player);
-	BufferIO::insert_value<uint8_t>(buffer, location);
+	BufferIO::insert_value<uint16_t>(buffer, location);
 	BufferIO::insert_value<uint8_t>(buffer, sequence);
 	uint32_t len = 0;
 	OCG_QueryInfo info{ flag, player, location, sequence };
@@ -1407,12 +1407,12 @@ void GenericDuel::RefreshSingle(uint8_t player, uint8_t location, uint8_t sequen
 	CoreUtils::Query query(buff);
 	query.GenerateBuffer(buffer, false, false);
 	replay_stream.emplace_back(buffer.data(), buffer.size() - 1);
-	buffer.resize(4);
+	buffer.resize(5);
 	query.GenerateBuffer(buffer, false, true);
 	NetServer::SendBufferToPlayer(nullptr, STOC_GAME_MSG, buffer);
 	for(auto& dueler : (player == 0) ? players.home : players.opposing)
 		NetServer::ReSendToPlayer(dueler);
-	buffer.resize(4);
+	buffer.resize(5);
 	query.GenerateBuffer(buffer, true, true);
 	NetServer::SendBufferToPlayer(nullptr, STOC_GAME_MSG, buffer);
 	for(auto& dueler : (player == 1) ? players.home : players.opposing)
@@ -1425,14 +1425,14 @@ void GenericDuel::PseudoRefreshDeck(uint8_t player, uint32_t flag) {
 	std::vector<uint8_t> buffer;
 	BufferIO::insert_value<uint8_t>(buffer, MSG_UPDATE_DATA);
 	BufferIO::insert_value<uint8_t>(buffer, player);
-	BufferIO::insert_value<uint8_t>(buffer, LOCATION_DECK);
+	BufferIO::insert_value<uint16_t>(buffer, LOCATION_DECK);
 	uint32_t len = 0;
 	OCG_QueryInfo info{ flag, player, LOCATION_DECK };
 	auto buff = pduel->DuelQueryLocation(&len, &info);
 	if(len == 0)
 		return;
 	buffer.resize(buffer.size() + len);
-	memcpy(&buffer[3], buff, len);
+	memcpy(&buffer[4], buff, len);
 	replay_stream.emplace_back(buffer.data(), buffer.size() - 1);
 }
 void GenericDuel::GenericTimer([[maybe_unused]] evutil_socket_t fd, [[maybe_unused]] short events, void* arg) {

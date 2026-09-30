@@ -48,9 +48,9 @@ public:
 	static bool ReplayAnalyze(const CoreUtils::Packet& packet);
 	static bool OldReplayAnalyze(const CoreUtils::Packet& packet);
 
-	static void ReplayRefresh(uint8_t player, uint8_t location, uint32_t flag = 0x2f81fff);
+	static void ReplayRefresh(uint8_t player, uint16_t location, uint32_t flag = 0x2f81fff);
 	static void ReplayRefresh(uint32_t flag = 0x2f81fff);
-	static void ReplayRefreshSingle(uint8_t player, uint8_t location, uint32_t sequence, uint32_t flag = 0x2f81fff);
+	static void ReplayRefreshSingle(uint8_t player, uint16_t location, uint32_t sequence, uint32_t flag = 0x2f81fff);
 	static void ReplayReload();
 };
 

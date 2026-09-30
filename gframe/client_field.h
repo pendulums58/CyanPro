@@ -92,11 +92,11 @@ public:
 	void Clear();
 	void Initial(uint8_t player, uint32_t deckc, uint32_t extrac);
 	std::vector<ClientCard*>* GetList(uint8_t location, uint8_t controler);
-	ClientCard* GetCard(uint8_t controler, uint8_t location, size_t sequence, size_t sub_seq = 0);
-	void AddCard(ClientCard* pcard, uint8_t controler, uint8_t location, uint32_t sequence);
-	ClientCard* RemoveCard(uint8_t controler, uint8_t location, uint32_t sequence);
-	void UpdateCard(uint8_t controler, uint8_t location, uint32_t sequence, const uint8_t* data, uint32_t len = 0);
-	void UpdateFieldCard(uint8_t controler, uint8_t location, const uint8_t* data, uint32_t len = 0);
+	ClientCard* GetCard(uint8_t controler, uint16_t location, size_t sequence, size_t sub_seq = 0);
+	void AddCard(ClientCard* pcard, uint8_t controler, uint16_t location, uint32_t sequence);
+	ClientCard* RemoveCard(uint8_t controler, uint16_t location, uint32_t sequence);
+	void UpdateCard(uint8_t controler, uint16_t location, uint32_t sequence, const uint8_t* data, uint32_t len = 0);
+	void UpdateFieldCard(uint8_t controler, uint16_t location, const uint8_t* data, uint32_t len = 0);
 	void ClearCommandFlag();
 	void ClearSelect();
 	void ClearChainSelect();

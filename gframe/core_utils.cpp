@@ -188,7 +188,7 @@ void Query::GenerateBuffer(std::vector<uint8_t>& buffer, bool is_for_public_buff
 			case QUERY_EQUIP_CARD: {
 				auto& info = (cur_flag == QUERY_REASON_CARD) ? reason_card : equip_card;
 				BufferIO::insert_value<uint8_t>(buffer, info.controler);
-				BufferIO::insert_value<uint8_t>(buffer, static_cast<uint8_t>(info.location));
+				BufferIO::insert_value<uint16_t>(buffer, info.location);
 				BufferIO::insert_value<uint32_t>(buffer, info.sequence);
 				BufferIO::insert_value<uint32_t>(buffer, info.position);
 				break;
@@ -197,7 +197,7 @@ void Query::GenerateBuffer(std::vector<uint8_t>& buffer, bool is_for_public_buff
 				BufferIO::insert_value<uint32_t>(buffer, static_cast<uint32_t>(target_cards.size()));
 				for(auto& info : target_cards) {
 					BufferIO::insert_value<uint8_t>(buffer, info.controler);
-					BufferIO::insert_value<uint8_t>(buffer, static_cast<uint8_t>(info.location));
+					BufferIO::insert_value<uint16_t>(buffer, info.location);
 					BufferIO::insert_value<uint32_t>(buffer, info.sequence);
 					BufferIO::insert_value<uint32_t>(buffer, info.position);
 				}
@@ -249,11 +249,11 @@ size_t Query::GetFlagSize(uint32_t to_check_flag) const {
 		return sizeof(uint64_t);
 
 	if((to_check_flag & (QUERY_REASON_CARD | QUERY_EQUIP_CARD)) != 0)
-		return sizeof(uint16_t) + sizeof(uint64_t);
+		return sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint32_t);
 
 	switch(to_check_flag) {
 	case QUERY_TARGET_CARD:
-		return sizeof(uint32_t) + (target_cards.size() * (sizeof(uint16_t) + sizeof(uint64_t)));
+		return sizeof(uint32_t) + (target_cards.size() * (sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint32_t)));
 	case QUERY_OVERLAY_CARD:
 		return sizeof(uint32_t) + (overlay_cards.size() * sizeof(uint32_t));
 	case QUERY_COUNTERS:
@@ -281,11 +281,12 @@ size_t Query::GetSize() const {
 loc_info ReadLocInfo(const uint8_t*& p, bool compat) {
 	loc_info info;
 	info.controler = BufferIO::Read<uint8_t>(p);
-	info.location = BufferIO::Read<uint8_t>(p);
 	if(compat) {
+		info.location = BufferIO::Read<uint8_t>(p);
 		info.sequence = BufferIO::Read<uint8_t>(p);
 		info.position = BufferIO::Read<uint8_t>(p);
 	} else {
+		info.location = BufferIO::Read<uint16_t>(p);
 		info.sequence = BufferIO::Read<uint32_t>(p);
 		info.position = BufferIO::Read<uint32_t>(p);
 	}
@@ -295,11 +296,12 @@ loc_info ReadLocInfo(const uint8_t*& p, bool compat) {
 loc_info ReadLocInfo(uint8_t*& p, bool compat) {
 	loc_info info;
 	info.controler = BufferIO::Read<uint8_t>(p);
-	info.location = BufferIO::Read<uint8_t>(p);
 	if(compat) {
+		info.location = BufferIO::Read<uint8_t>(p);
 		info.sequence = BufferIO::Read<uint8_t>(p);
 		info.position = BufferIO::Read<uint8_t>(p);
 	} else {
+		info.location = BufferIO::Read<uint16_t>(p);
 		info.sequence = BufferIO::Read<uint32_t>(p);
 		info.position = BufferIO::Read<uint32_t>(p);
 	}

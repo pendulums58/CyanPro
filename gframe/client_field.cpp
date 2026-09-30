@@ -159,7 +159,7 @@ std::vector<ClientCard*>* ClientField::GetList(uint8_t location, uint8_t control
 	}
 	return nullptr;
 }
-ClientCard* ClientField::GetCard(uint8_t controler, uint8_t location, size_t sequence, size_t sub_seq) {
+ClientCard* ClientField::GetCard(uint8_t controler, uint16_t location, size_t sequence, size_t sub_seq) {
 	bool is_xyz = (location & LOCATION_OVERLAY) != 0;
 	auto lst = GetList(location & (~LOCATION_OVERLAY), controler);
 	if(!lst)
@@ -178,7 +178,7 @@ ClientCard* ClientField::GetCard(uint8_t controler, uint8_t location, size_t seq
 		return (*lst)[sequence];
 	}
 }
-void ClientField::AddCard(ClientCard* pcard, uint8_t controler, uint8_t location, uint32_t sequence) {
+void ClientField::AddCard(ClientCard* pcard, uint8_t controler, uint16_t location, uint32_t sequence) {
 	pcard->controler = controler;
 	pcard->location = location;
 	pcard->sequence = sequence;
@@ -247,7 +247,7 @@ void ClientField::AddCard(ClientCard* pcard, uint8_t controler, uint8_t location
 	}
 	}
 }
-ClientCard* ClientField::RemoveCard(uint8_t controler, uint8_t location, uint32_t sequence) {
+ClientCard* ClientField::RemoveCard(uint8_t controler, uint16_t location, uint32_t sequence) {
 	auto RemoveFromPile = [&](auto& pile) {
 		float z_decrease = gGameConfig->topdown_view ? 0.0f : 0.01f;
 		auto pcard = pile[controler][sequence];
@@ -301,7 +301,7 @@ ClientCard* ClientField::RemoveCard(uint8_t controler, uint8_t location, uint32_
 	pcard->location = 0;
 	return pcard;
 }
-void ClientField::UpdateCard(uint8_t controler, uint8_t location, uint32_t sequence, const uint8_t* data, uint32_t len) {
+void ClientField::UpdateCard(uint8_t controler, uint16_t location, uint32_t sequence, const uint8_t* data, uint32_t len) {
 	ClientCard* pcard = GetCard(controler, location, sequence);
 	if(pcard) {
 		if(mainGame->dInfo.compat_mode)
@@ -309,7 +309,7 @@ void ClientField::UpdateCard(uint8_t controler, uint8_t location, uint32_t seque
 		pcard->UpdateInfo(CoreUtils::Query{ data, mainGame->dInfo.compat_mode, len, mainGame->dInfo.legacy_race_size });
 	}
 }
-void ClientField::UpdateFieldCard(uint8_t controler, uint8_t location, const uint8_t* data, uint32_t len) {
+void ClientField::UpdateFieldCard(uint8_t controler, uint16_t location, const uint8_t* data, uint32_t len) {
 	auto lst = GetList(location, controler);
 	if(!lst)
 		return;

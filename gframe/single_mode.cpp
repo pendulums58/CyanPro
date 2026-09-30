@@ -512,7 +512,7 @@ bool SingleMode::SinglePlayAnalyze(CoreUtils::Packet& packet) {
 	new_replay.Flush();
 	return is_continuing;
 }
-void SingleMode::SinglePlayRefresh(uint8_t player, uint8_t location, uint32_t flag) {
+void SingleMode::SinglePlayRefresh(uint8_t player, uint16_t location, uint32_t flag) {
 	std::vector<uint8_t> buffer;
 	uint32_t len = 0;
 	OCG_QueryInfo info{ flag, player, location };
@@ -524,11 +524,12 @@ void SingleMode::SinglePlayRefresh(uint8_t player, uint8_t location, uint32_t fl
 	mainGame->gMutex.lock();
 	mainGame->dField.UpdateFieldCard(mainGame->LocalPlayer(player), location, buffer.data());
 	mainGame->gMutex.unlock();
-	buffer.insert(buffer.begin(), location);
+	buffer.insert(buffer.begin(), static_cast<uint8_t>((location >> 8) & 0xFF));
+	buffer.insert(buffer.begin(), static_cast<uint8_t>(location & 0xFF));
 	buffer.insert(buffer.begin(), player);
 	replay_stream.emplace_back(MSG_UPDATE_DATA, buffer.data(), buffer.size());
 }
-void SingleMode::SinglePlayRefreshSingle(uint8_t player, uint8_t location, uint8_t sequence, uint32_t flag) {
+void SingleMode::SinglePlayRefreshSingle(uint8_t player, uint16_t location, uint8_t sequence, uint32_t flag) {
 	std::vector<uint8_t> buffer;
 	uint32_t len = 0;
 	OCG_QueryInfo info{ flag, player, location, sequence };
@@ -541,7 +542,8 @@ void SingleMode::SinglePlayRefreshSingle(uint8_t player, uint8_t location, uint8
 	mainGame->dField.UpdateCard(mainGame->LocalPlayer(player), location, sequence, buffer.data());
 	mainGame->gMutex.unlock();
 	buffer.insert(buffer.begin(), sequence);
-	buffer.insert(buffer.begin(), location);
+	buffer.insert(buffer.begin(), static_cast<uint8_t>((location >> 8) & 0xFF));
+	buffer.insert(buffer.begin(), static_cast<uint8_t>(location & 0xFF));
 	buffer.insert(buffer.begin(), player);
 	replay_stream.emplace_back(MSG_UPDATE_CARD, buffer.data(), buffer.size());
 }

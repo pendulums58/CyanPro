@@ -44,8 +44,8 @@ public:
 	void RefreshHand(uint8_t player, uint32_t flag = 0x3781fff);
 	void RefreshGrave(uint8_t player, uint32_t flag = 0x381fff);
 	void RefreshExtra(uint8_t player, uint32_t flag = 0x381fff);
-	void RefreshLocation(uint8_t player, uint32_t flag, uint8_t location);
-	void RefreshSingle(uint8_t player, uint8_t location, uint8_t sequence, uint32_t flag = 0x3f81fff);
+	void RefreshLocation(uint8_t player, uint32_t flag, uint16_t location);
+	void RefreshSingle(uint8_t player, uint16_t location, uint8_t sequence, uint32_t flag = 0x3f81fff);
 
 	static void GenericTimer(evutil_socket_t fd, short events, void* arg);
 

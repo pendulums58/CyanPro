@@ -1686,24 +1686,25 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 	}
 	case MSG_UPDATE_DATA: {
 		const auto player = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto location = BufferIO::Read<uint8_t>(pbuf);
+		const auto location = CompatRead<uint8_t, uint16_t>(pbuf);
 		auto lock = LockIf();
-		mainGame->dField.UpdateFieldCard(player, location, pbuf, len - 2);
+		mainGame->dField.UpdateFieldCard(player, location, pbuf, len - (mainGame->dInfo.compat_mode ? 2u : 3u));
 		return true;
 	}
 	case MSG_UPDATE_CARD: {
 		const auto player = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto loc = BufferIO::Read<uint8_t>(pbuf);
+		const auto loc = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto seq = BufferIO::Read<uint8_t>(pbuf);
 		auto lock = LockIf();
-		mainGame->dField.UpdateCard(player, loc, seq, pbuf, len - 3);
+		mainGame->dField.UpdateCard(player, loc, seq, pbuf, len - (mainGame->dInfo.compat_mode ? 3u : 4u));
 		break;
 	}
 	case MSG_SELECT_BATTLECMD: {
 		/*uint8_t selecting_player = */BufferIO::Read<uint8_t>(pbuf);
 		uint64_t desc;
 		uint32_t code, count, seq;
-		uint8_t con, loc/*, diratt*/;
+		uint8_t con;
+		uint16_t loc;
 		ClientCard* pcard;
 		mainGame->dField.activatable_cards.clear();
 		mainGame->dField.activatable_descs.clear();
@@ -1713,7 +1714,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc =  BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			desc = CompatRead<uint32_t, uint64_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
@@ -1753,7 +1754,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			/*code = */BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = BufferIO::Read<uint8_t>(pbuf);
 			/*diratt = */BufferIO::Read<uint8_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
@@ -1778,7 +1779,8 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 	case MSG_SELECT_IDLECMD: {
 		/*uint8_t selecting_player = */BufferIO::Read<uint8_t>(pbuf);
 		uint32_t code, count, seq;
-		uint8_t con, loc;
+		uint8_t con;
+		uint16_t loc;
 		uint64_t desc;
 		ClientCard* pcard;
 		mainGame->dField.summonable_cards.clear();
@@ -1787,7 +1789,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
 			mainGame->dField.summonable_cards.push_back(pcard);
@@ -1799,7 +1801,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
 			mainGame->dField.spsummonable_cards.push_back(pcard);
@@ -1832,7 +1834,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = BufferIO::Read<uint8_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
 			mainGame->dField.reposable_cards.push_back(pcard);
@@ -1844,7 +1846,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
 			mainGame->dField.msetable_cards.push_back(pcard);
@@ -1856,7 +1858,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
 			mainGame->dField.ssetable_cards.push_back(pcard);
@@ -1870,7 +1872,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			con = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			loc = BufferIO::Read<uint8_t>(pbuf);
+			loc = CompatRead<uint8_t, uint16_t>(pbuf);
 			seq = CompatRead<uint8_t, uint32_t>(pbuf);
 			desc = CompatRead<uint32_t, uint64_t>(pbuf);
 			pcard = mainGame->dField.GetCard(con, loc, seq);
@@ -2362,13 +2364,14 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		mainGame->dField.selectable_cards.clear();
 		mainGame->dField.selected_cards.clear();
 		uint32_t code, s;
-		uint8_t c, l, t;
+		uint8_t c, t;
+		uint16_t l;
 		ClientCard* pcard;
 		mainGame->dField.select_ready = false;
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
 			c = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			l = BufferIO::Read<uint8_t>(pbuf);
+			l = CompatRead<uint8_t, uint16_t>(pbuf);
 			s = CompatRead<uint8_t, uint32_t>(pbuf);
 			t = BufferIO::Read<uint8_t>(pbuf);
 			pcard = mainGame->dField.GetCard(c, l, s);
@@ -2396,12 +2399,13 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		mainGame->dField.selectable_cards.clear();
 		/*uint32_t code;*/
 		uint16_t t;
-		uint8_t c, l, s;
+		uint8_t c, s;
+		uint16_t l;
 		ClientCard* pcard;
 		for(uint32_t i = 0; i < count; ++i) {
 			/*code = */BufferIO::Read<uint32_t>(pbuf);
 			c = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			l = BufferIO::Read<uint8_t>(pbuf);
+			l = CompatRead<uint8_t, uint16_t>(pbuf);
 			s = BufferIO::Read<uint8_t>(pbuf);
 			t = BufferIO::Read<uint16_t>(pbuf);
 			pcard = mainGame->dField.GetCard(c, l, s);
@@ -2593,7 +2597,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		for(uint32_t i = 0; i < count; ++i) {
 			auto code = BufferIO::Read<uint32_t>(pbuf);
 			auto controller = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-			auto location = BufferIO::Read<uint8_t>(pbuf);
+			auto location = CompatRead<uint8_t, uint16_t>(pbuf);
 			auto sequence = CompatRead<uint8_t, uint32_t>(pbuf);
 			std::unique_lock<epro::mutex> lock(mainGame->gMutex);
 			ClientCard* pcard;
@@ -2881,7 +2885,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 	}
 	case MSG_SHUFFLE_SET_CARD: {
 		std::vector<ClientCard*>* lst = 0;
-		const auto loc = BufferIO::Read<uint8_t>(pbuf);
+		const auto loc = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto count = BufferIO::Read<uint8_t>(pbuf);
 		if(loc == LOCATION_MZONE)
 			lst = mainGame->dField.mzone;
@@ -3218,7 +3222,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 	case MSG_POS_CHANGE: {
 		const auto code = BufferIO::Read<uint32_t>(pbuf);
 		const auto cc = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto cl = BufferIO::Read<uint8_t>(pbuf);
+		const auto cl = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto cs = BufferIO::Read<uint8_t>(pbuf);
 		const auto pp = BufferIO::Read<uint8_t>(pbuf);
 		const auto cp = BufferIO::Read<uint8_t>(pbuf);
@@ -3357,7 +3361,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 			Play(SoundManager::SFX::ACTIVATE);
 		CoreUtils::loc_info info = CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
 		const auto cc = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto cl = BufferIO::Read<uint8_t>(pbuf);
+		const auto cl = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto cs = CompatRead<uint8_t, uint32_t>(pbuf);
 		const auto desc = CompatRead<uint32_t, uint64_t>(pbuf);
 		/*const auto ct = */CompatRead<uint8_t, uint32_t>(pbuf);
@@ -3713,7 +3717,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		Play(SoundManager::SFX::COUNTER_ADD);
 		const auto type = BufferIO::Read<uint16_t>(pbuf);
 		const auto c = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto l = BufferIO::Read<uint8_t>(pbuf);
+		const auto l = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto s = BufferIO::Read<uint8_t>(pbuf);
 		const auto count = BufferIO::Read<uint16_t>(pbuf);
 		ClientCard* pc = mainGame->dField.GetCard(c, l, s);
@@ -3734,7 +3738,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		Play(SoundManager::SFX::COUNTER_REMOVE);
 		const auto type = BufferIO::Read<uint16_t>(pbuf);
 		const auto c = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-		const auto l = BufferIO::Read<uint8_t>(pbuf);
+		const auto l = CompatRead<uint8_t, uint16_t>(pbuf);
 		const auto s = BufferIO::Read<uint8_t>(pbuf);
 		const auto count = BufferIO::Read<uint16_t>(pbuf);
 		ClientCard* pc = mainGame->dField.GetCard(c, l, s);
@@ -4203,7 +4207,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 					xcard->controler = p;
 				}
 			}
-			auto push_range = [&pbuf,p](uint8_t location) {
+			auto push_range = [&pbuf,p](uint16_t location) {
 				const auto val = CompatRead<uint8_t, uint32_t>(pbuf);
 				for(uint32_t seq = 0; seq < val; ++seq)
 					mainGame->dField.AddCard(new ClientCard{}, p, location, seq);
@@ -4224,7 +4228,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				CoreUtils::loc_info info = CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
 				info.controler = mainGame->LocalPlayer(info.controler);
 				uint8_t cc = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
-				uint8_t cl = BufferIO::Read<uint8_t>(pbuf);
+				uint16_t cl = CompatRead<uint8_t, uint16_t>(pbuf);
 				uint32_t cs = BufferIO::Read<uint32_t>(pbuf);
 				uint64_t desc = CompatRead<uint32_t, uint64_t>(pbuf);
 				ClientCard* pcard = mainGame->dField.GetCard(info.controler, info.location, info.sequence, info.position);

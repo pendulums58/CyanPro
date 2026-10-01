@@ -404,6 +404,9 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			else if(curcard->location == LOCATION_OVERLAY) {
 				text = epro::format(L"{}[{}]({})", gDataManager->FormatLocation(curcard->overlayTarget->location, curcard->overlayTarget->sequence),
 					curcard->overlayTarget->sequence + 1, curcard->sequence + 1);
+			} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+				text = epro::format(L"{}[{}]", gDataManager->FormatLocation(LOCATION_ADMIN, 0),
+					curcard->adminTarget->sequence + 1);
 			} else if(curcard->location) {
 				text = epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),
 					curcard->sequence + 1);
@@ -419,6 +422,13 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 					if(curcard->owner != curcard->overlayTarget->controler)
 						curstring->setOverrideColor(skin::DUELFIELD_CARD_SELECT_WINDOW_OVERLAY_TEXT_VAL);
 					if(curcard->overlayTarget->controler)
+						curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
+					else
+						curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
+				} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+					if(curcard->owner != curcard->adminTarget->controler)
+						curstring->setOverrideColor(skin::DUELFIELD_CARD_SELECT_WINDOW_OVERLAY_TEXT_VAL);
+					if(curcard->adminTarget->controler)
 						curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
 					else
 						curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
@@ -544,6 +554,9 @@ void ClientField::ShowLocationCard() {
 		if(curcard->location == LOCATION_OVERLAY) {
 			text = epro::format(L"{}[{}]({})", gDataManager->FormatLocation(curcard->overlayTarget->location, curcard->overlayTarget->sequence),
 				curcard->overlayTarget->sequence + 1, curcard->sequence + 1);
+		} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+			text = epro::format(L"{}[{}]", gDataManager->FormatLocation(LOCATION_ADMIN, 0),
+				curcard->adminTarget->sequence + 1);
 		} else if(curcard->location) {
 			text = epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),
 				curcard->sequence + 1);
@@ -553,6 +566,13 @@ void ClientField::ShowLocationCard() {
 			if(curcard->owner != curcard->overlayTarget->controler)
 				curstring->setOverrideColor(skin::DUELFIELD_CARD_SELECT_WINDOW_OVERLAY_TEXT_VAL);
 			if(curcard->overlayTarget->controler)
+				curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
+			else
+				curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
+		} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+			if(curcard->owner != curcard->adminTarget->controler)
+				curstring->setOverrideColor(skin::DUELFIELD_CARD_SELECT_WINDOW_OVERLAY_TEXT_VAL);
+			if(curcard->adminTarget->controler)
 				curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
 			else
 				curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
@@ -1008,6 +1028,8 @@ void ClientField::MoveCard(ClientCard* pcard, float frame) {
 	pcard->is_moving = true;
 	pcard->refresh_on_stop = true;
 	pcard->aniFrame = milliseconds;
+	if(pcard->adminCard)
+		MoveCard(pcard->adminCard, frame);
 }
 void ClientField::FadeCard(ClientCard* pcard, float alpha, float frame) {
 	float milliseconds = frame * 1000.0f / 60.0f;

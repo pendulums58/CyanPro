@@ -559,14 +559,18 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					ClientCard* pcard = mzone[command_controler][command_sequence];
 					for(auto& _pcard : pcard->overlayed)
 						selectable_cards.push_back(_pcard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), pcard->overlayed.size()).data());
+					if(pcard->adminCard)
+						selectable_cards.push_back(pcard->adminCard);
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_SZONE: {
 					ClientCard* pcard = szone[command_controler][command_sequence];
 					for (auto& _pcard : pcard->overlayed)
 						selectable_cards.push_back(_pcard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), pcard->overlayed.size()).data());
+					if(pcard->adminCard)
+						selectable_cards.push_back(pcard->adminCard);
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {
@@ -914,6 +918,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						else if(curcard->location == LOCATION_OVERLAY) {
 							text = epro::format(L"{}[{}]({})", gDataManager->FormatLocation(curcard->overlayTarget->location, curcard->overlayTarget->sequence),
 								curcard->overlayTarget->sequence + 1, curcard->sequence + 1);
+						} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+							text = epro::format(L"{}[{}]", gDataManager->FormatLocation(LOCATION_ADMIN, 0),
+								curcard->adminTarget->sequence + 1);
 						} else if(curcard->location != 0) {
 							text = epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),
 								curcard->sequence + 1);
@@ -929,6 +936,15 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						if(curcard->is_selected)
 							curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELECTED_WINDOW_BACKGROUND_VAL);
 						else if(curcard->overlayTarget->controler)
+							curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
+						else
+							curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
+					} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+						if(curcard->owner != curcard->adminTarget->controler)
+							curstring->setOverrideColor(skin::DUELFIELD_CARD_SELECT_WINDOW_OVERLAY_TEXT_VAL);
+						if(curcard->is_selected)
+							curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELECTED_WINDOW_BACKGROUND_VAL);
+						else if(curcard->adminTarget->controler)
 							curstring->setBackgroundColor(skin::DUELFIELD_CARD_OPPONENT_WINDOW_BACKGROUND_VAL);
 						else
 							curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
@@ -968,6 +984,9 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					if(curcard->location == LOCATION_OVERLAY) {
 						text = epro::format(L"{}[{}]({})", gDataManager->FormatLocation(curcard->overlayTarget->location, curcard->overlayTarget->sequence),
 							curcard->overlayTarget->sequence + 1, curcard->sequence + 1);
+					} else if(curcard->location == LOCATION_ADMIN && curcard->adminTarget) {
+						text = epro::format(L"{}[{}]", gDataManager->FormatLocation(LOCATION_ADMIN, 0),
+							curcard->adminTarget->sequence + 1);
 					} else {
 						text = epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),
 							curcard->sequence + 1);
@@ -1155,11 +1174,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					break;
 				}
 				case LOCATION_MZONE: {
-					if(!clicked_card || clicked_card->overlayed.size() == 0)
+					if(!clicked_card || (clicked_card->overlayed.size() == 0 && !clicked_card->adminCard))
 						break;
 					for(auto& pcard : clicked_card->overlayed)
 						selectable_cards.push_back(pcard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), clicked_card->overlayed.size()).data());
+					if(clicked_card->adminCard)
+						selectable_cards.push_back(clicked_card->adminCard);
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {
@@ -1197,11 +1218,13 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				selectable_cards.clear();
 				switch(hovered_location) {
 				case LOCATION_MZONE: {
-					if(!clicked_card || clicked_card->overlayed.size() == 0)
+					if(!clicked_card || (clicked_card->overlayed.size() == 0 && !clicked_card->adminCard))
 						break;
 					for(int32_t i = 0; i < (int32_t)clicked_card->overlayed.size(); ++i)
 						selectable_cards.push_back(clicked_card->overlayed[i]);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), clicked_card->overlayed.size()).data());
+					if(clicked_card->adminCard)
+						selectable_cards.push_back(clicked_card->adminCard);
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {
@@ -1241,7 +1264,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				switch(hovered_location) {
 				case LOCATION_MZONE:
 				case LOCATION_SZONE: {
-					if(!clicked_card || clicked_card->overlayed.size() == 0)
+					if(!clicked_card || (clicked_card->overlayed.size() == 0 && !clicked_card->adminCard))
 						break;
 					ShowMenu(COMMAND_LIST, x, y);
 					break;
@@ -1289,7 +1312,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					if(!clicked_card)
 						break;
 					int command_flag = clicked_card->cmdFlag;
-					if(clicked_card->overlayed.size())
+					if(clicked_card->overlayed.size() || clicked_card->adminCard)
 						command_flag |= COMMAND_LIST;
 					list_command = 0;
 					ShowMenu(command_flag, x, y);

@@ -426,6 +426,8 @@ std::wstring DataManager::GetNumString(size_t num, bool bracket) const {
 }
 
 epro::wstringview DataManager::FormatLocation(uint32_t location, int sequence) const {
+	if(location == LOCATION_ADMIN)
+		return GetSysString(1095);
 	if(location == 0x8) {
 		if(sequence < 5)
 			return GetSysString(1003);

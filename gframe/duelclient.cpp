@@ -3111,6 +3111,8 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		} else {
 			if(current.location & LOCATION_ADMIN) {
 				ClientCard* pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
+				if(!pcard)
+					return true;
 				if(code != 0 && pcard->code != code)
 					pcard->SetCode(code);
 				pcard->counters.clear();
@@ -3119,6 +3121,13 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				pcard->is_showchaintarget = false;
 				mainGame->dField.RemoveCard(previous.controler, previous.location, previous.sequence);
 				ClientCard* host = mainGame->dField.GetCard(current.controler, current.location & ~LOCATION_ADMIN, current.sequence);
+				if(!host) {
+#if EDOPRO_WINDOWS
+					OutputDebugStringA("[ORICA] MSG_MOVE: admin host lookup failed\n");
+#endif
+					mainGame->dField.AddCard(pcard, current.controler, current.location & ~LOCATION_ADMIN, current.sequence);
+					return true;
+				}
 				pcard->adminTarget = host;
 				host->adminCard = pcard;
 				mainGame->dField.admin_cards.insert(pcard);
@@ -3135,6 +3144,8 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				}
 			} else if(previous.location & LOCATION_ADMIN) {
 				ClientCard* pcard = mainGame->dField.GetCard(previous.controler, previous.location, previous.sequence);
+				if(!pcard)
+					return true;
 				if(pcard->adminTarget) {
 					pcard->adminTarget->adminCard = nullptr;
 					pcard->adminTarget = nullptr;

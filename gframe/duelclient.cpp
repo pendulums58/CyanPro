@@ -4122,6 +4122,17 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		CoreUtils::ReadLocInfo(pbuf, mainGame->dInfo.compat_mode);
 		return true;
 	}
+	case MSG_ANNOUNCE: {
+		auto len = BufferIO::Read<uint16_t>(pbuf);
+		if(len > 256)
+			len = 256;
+		std::string str(reinterpret_cast<const char*>(pbuf), len);
+		pbuf += len;
+		BufferIO::Read<uint8_t>(pbuf);
+		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
+		mainGame->AddChatMsg(BufferIO::DecodeUTF8(str), 8, 2);
+		return true;
+	}
 	case MSG_TAG_SWAP: {
 		const auto player = mainGame->LocalPlayer(BufferIO::Read<uint8_t>(pbuf));
 		const auto mcount = CompatRead<uint8_t, uint32_t>(pbuf);

@@ -692,6 +692,7 @@ public:
 	uint16_t extra_rules;
 	uint64_t duel_param;
 	uint32_t showingcard;
+	bool ctrl_held{};
 	bool cardimagetextureloading;
 	float dpi_scale;
 

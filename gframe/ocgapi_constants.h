@@ -316,6 +316,7 @@ inline bool is_extra_deck_type(uint32_t type) {
 #define MSG_REMOVE_CARDS         190
 #define MSG_SET_ADMIN            200
 #define MSG_REMOVE_ADMIN         201
+#define MSG_ANNOUNCE             204
 
 /* Duel Hints */
 #define HINT_EVENT      1

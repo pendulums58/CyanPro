@@ -45,3 +45,11 @@ premake5.exe
 !/irrlicht/defines.lua
 bundled_font.cpp
 NotoSansJP-Regular.otf
+
+*.dll
+*.lib
+*.pdb
+*.exp
+*.ilk
+*.idb
+*.log

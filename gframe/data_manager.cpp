@@ -175,7 +175,15 @@ bool DataManager::ParseDB(sqlite3* pDB) {
 	}
 	sqlite3_finalize(pStmt);
 	sqlite3_close(pDB);
+	RebuildKeyUnlockMap();
 	return true;
+}
+void DataManager::RebuildKeyUnlockMap() {
+	key_unlock_map.clear();
+	for(const auto& [code, cardm] : cards) {
+		if((cardm._data.type & TYPE_UNLOCKED) && cardm._data.alias)
+			key_unlock_map[cardm._data.alias] = code;
+	}
 }
 bool DataManager::ParseLocaleDB(sqlite3* pDB) {
 	if(pDB == nullptr)

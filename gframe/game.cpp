@@ -196,9 +196,10 @@ void Game::Initialize() {
 	wAbout->setDraggable(false);
 	wAbout->setDrawTitlebar(false);
 	wAbout->setDrawBackground(false);
-	stAbout = irr::gui::CGUICustomText::addCustomText(L"Project Ignis: EDOPro\n"
-											L"The bleeding-edge automatic duel simulator\n"
+	stAbout = irr::gui::CGUICustomText::addCustomText(L"CyanPro\n"
+											L"Automatic duel simulator\n"
 											L"\n"
+											L"This is a modified version of EDOPro (Project Ignis).\n"
 											L"Copyright (C) 2020-2026 Edoardo Lolletti (edo9300) and others\n"
 											L"Card scripts and supporting resources by Project Ignis.\n"
 											L"https://github.com/edo9300/edopro\n"
@@ -214,7 +215,7 @@ void Game::Initialize() {
 											L"Finn, Gideon, Hatter, Icematoro, Larry126, Naim, pyrQ, Sanct,"
 											L"senpaizuri, Steeldarkeagel, TheRazgriz, WolfOfWolves, Yamato, YoshiDuels\n"
 											L"\n"
-											L"Default background and icon: LogicalNonsense\n"
+											L"Default background: LogicalNonsense\n"
 											L"Default fields: Icematoro\n"
 											L"\n"
 											L"Forked from Fluorohydride's YGOPro, maintainer mercury233.\n"
@@ -2819,8 +2820,34 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 			return;
 		only_texture = only_texture || !resize;
 	}
+	bool is_locked_key = cd && (cd->type & TYPE_KEY) && !(cd->type & TYPE_UNLOCKED);
+	bool is_unlocked_key = cd && (cd->type & TYPE_KEY) && (cd->type & TYPE_UNLOCKED);
+	bool key_preview = false;
+	auto tmp_code = code;
+	if(ctrl_held) {
+		if(is_locked_key) {
+			auto it = gDataManager->key_unlock_map.find(code);
+			if(it == gDataManager->key_unlock_map.end() && cd->alias)
+				it = gDataManager->key_unlock_map.find(cd->alias);
+			if(it != gDataManager->key_unlock_map.end()) {
+				auto preview_cd = gDataManager->GetCardData(it->second);
+				if(preview_cd) {
+					cd = preview_cd;
+					tmp_code = it->second;
+					key_preview = true;
+				}
+			}
+		} else if(is_unlocked_key && cd->alias) {
+			auto locked_cd = gDataManager->GetCardData(cd->alias);
+			if(locked_cd) {
+				tmp_code = cd->alias;
+				cd = locked_cd;
+				key_preview = true;
+			}
+		}
+	}
 	int shouldrefresh = -1;
-	auto img = imageManager.GetTextureCard(code, resize ? prevtype : type, false, true, &shouldrefresh);
+	auto img = imageManager.GetTextureCard(key_preview ? tmp_code : code, resize ? prevtype : type, false, true, &shouldrefresh);
 	cardimagetextureloading = false;
 	if(shouldrefresh == 2)
 		cardimagetextureloading = true;
@@ -2828,8 +2855,7 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 	showingcard = code;
 	if(only_texture)
 		return;
-	auto tmp_code = code;
-	if(cd->IsInArtworkOffsetRange())
+	if(!key_preview && cd->IsInArtworkOffsetRange())
 		tmp_code = cd->alias;
 	stName->setText(gDataManager->GetName(tmp_code).data());
 	stPasscodeScope->setText(epro::format(L"[{:08}] {}", tmp_code, gDataManager->FormatScope(cd->ot)).data());
@@ -2884,7 +2910,19 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 			stDataInfo->setText(L"");
 	}
 	RefreshCardInfoTextPositions();
-	stText->setText(gDataManager->GetText(code).data());
+	if(key_preview) {
+		stText->setText(gDataManager->GetText(tmp_code).data());
+	} else if(is_locked_key) {
+		auto desc = std::wstring(gDataManager->GetText(code));
+		desc.append(L"\n\n(Ctrl: Unlock Preview)");
+		stText->setText(desc.data());
+	} else if(is_unlocked_key) {
+		auto desc = std::wstring(gDataManager->GetText(code));
+		desc.append(L"\n\n(Ctrl: Lock Preview)");
+		stText->setText(desc.data());
+	} else {
+		stText->setText(gDataManager->GetText(code).data());
+	}
 }
 void Game::RefreshCardInfoTextPositions() {
 	const int xLeft = Scale(15);
@@ -3339,6 +3377,8 @@ void Game::RefreshUICoreVersion() {
 	auto label = corename.length()
 		? epro::format(gDataManager->GetSysString(2013), ocgcore->ver_major, ocgcore->ver_minor, corename)
 		: epro::format(gDataManager->GetSysString(2010), ocgcore->ver_major, ocgcore->ver_minor);
+	if(ocgcore->ver_minor == 3)
+		label.insert(0, L"[ORICA] ");
 	stCoreVersion->setText(label.data());
 	auto w1 = stVersion->getTextWidth();
 	auto w2 = stCoreVersion->getTextWidth();

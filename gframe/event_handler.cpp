@@ -1785,6 +1785,19 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 			}
 			break;
 		}
+		case irr::KEY_LCONTROL:
+		case irr::KEY_RCONTROL: {
+			mainGame->ctrl_held = event.KeyInput.PressedDown;
+			uint32_t sc = mainGame->showingcard;
+			if(sc) {
+				auto cdata = gDataManager->GetCardData(sc);
+				if(cdata && (cdata->type & TYPE_KEY)) {
+					mainGame->showingcard = 0;
+					mainGame->ShowCardInfo(sc);
+				}
+			}
+			break;
+		}
 		default: break;
 		}
 		break;
@@ -2265,6 +2278,19 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event, bool& stopPropagation)
 		case irr::KEY_KEY_5: {
 			if (event.KeyInput.Control && !event.KeyInput.PressedDown)
 				mainGame->wInfos->setActiveTab(4);
+			break;
+		}
+		case irr::KEY_LCONTROL:
+		case irr::KEY_RCONTROL: {
+			mainGame->ctrl_held = event.KeyInput.PressedDown;
+			uint32_t sc = mainGame->showingcard;
+			if(sc) {
+				auto cdata = gDataManager->GetCardData(sc);
+				if(cdata && (cdata->type & TYPE_KEY)) {
+					mainGame->showingcard = 0;
+					mainGame->ShowCardInfo(sc);
+				}
+			}
 			break;
 		}
 		default: break;

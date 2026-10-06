@@ -1,39 +1,33 @@
-# [Project Ignis](https://github.com/ProjectIgnis): EDOPro
+# CyanPro
 
-The bleeding-edge automatic duel simulator, a fork of the [YGOPro client](https://github.com/Fluorohydride/ygopro).
+EDOPro(Project Ignis)의 수정판입니다. 오리카 전용 시스템
+(액세스 · 하이잭 · 페어링 · 기프트 · 키)을 엔진 차원에서 지원하도록
+2026년에 수정되었습니다.
 
-All YGOPro forks and known automatic duel simulators are powered by the [YGOPro core (ocgcore)](https://github.com/Fluorohydride/ygopro-core), an automated scripting engine for the Yu-Gi-Oh! Official Card Game. EDOPro is powered by our own [ocgcore fork](https://github.com/edo9300/ygopro-core).
+이 소프트웨어는 AGPL-3.0-or-later 로 배포됩니다.
 
-Due to many accumulated changes in this client and its core, it is incompatible with simulators not derived from this fork.
+## 원저작권
 
-This repository is for the game client only. Related Ignis projects:
-- [Canonical card script collection](https://github.com/ProjectIgnis/CardScripts)
-- [Canonical card databases collection](https://github.com/ProjectIgnis/BabelCdb)
-- [WindBot Ignite](https://github.com/ProjectIgnis/windbot/)
+- Copyright (c) 2010-2015, Argon Sun (Fluorohydride)
+- Copyright (c) 2017-2025, Edoardo Lolletti (edo9300)
 
-## Contributing
+## 수정
 
-Please keep all usage questions and Windows and macOS bug reports on Discord; do not open an issue or pull request for this purpose.
-We are not taking suggestions or feature requests and the issue tracker is not to be used for this purpose either.
+- Copyright (c) 2026, 시안
 
-Otherwise, pull requests are welcome! It might take some time for them to be evaluated since we are pretty swamped with a lot work to be done.
+## 관련 리포지토리
 
-Check out the [wiki](https://github.com/edo9300/edopro/wiki/) for possibly outdated build instructions and a partial user manual.
+- [CyanCore](https://github.com/pendulums58/CyanCore) — 오리카 시스템을 지원하는 코어 엔진
 
-## Project Ignis
+## 원본
 
-We are an international, open-source collaboration staffed entirely by volunteers and we welcome support on our projects.
-Reach out to us on Discord to learn how to contribute and join!
-
-_Ignis_ is the fire and light of knowledge passed from the gods to humanity in Greco-Roman mythology.
-This represents our vision for all of our projects and work and recognizes the contribution of every individual on the team.
-
-[Debut announcement on Reddit](https://www.reddit.com/r/yugioh/comments/fvdn7v/presenting_project_ignis_edopro_the_opensource/).
+- [EDOPro](https://github.com/edo9300/edopro)
+- [ygopro-core](https://github.com/edo9300/ygopro-core)
+- [YGOPro](https://github.com/Fluorohydride/ygopro)
 
 ## License
 
-EDOPro is free/libre and open source software licensed under the GNU Affero General Public License, version 3 or later.
-Dependencies and resources may be provided under different licenses.
-Please see [LICENSE](https://github.com/edo9300/edopro/blob/master/LICENSE) and [COPYING](https://github.com/edo9300/edopro/blob/master/COPYING) for more details.
+CyanPro is free/libre and open source software licensed under the GNU Affero General Public License, version 3 or later.
+Please see [COPYING](COPYING) and [LICENSE](LICENSE) for more details.
 
 Yu-Gi-Oh! is a trademark of Shueisha and Konami. This project is not affiliated with or endorsed by Shueisha or Konami.

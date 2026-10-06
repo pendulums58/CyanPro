@@ -407,6 +407,16 @@ bool SingleMode::SinglePlayAnalyze(CoreUtils::Packet& packet) {
 			}
 			break;
 		}
+		case MSG_ANNOUNCE: {
+			auto* pbuf = packet.data();
+			auto len = BufferIO::Read<uint16_t>(pbuf);
+			if(len > 256)
+				len = 256;
+			std::string str(reinterpret_cast<const char*>(pbuf), len);
+			std::lock_guard<epro::mutex> lock(mainGame->gMutex);
+			mainGame->AddChatMsg(BufferIO::DecodeUTF8(str), 8, 2);
+			break;
+		}
 		case MSG_SELECT_BATTLECMD:
 		case MSG_SELECT_IDLECMD: {
 			record = false;

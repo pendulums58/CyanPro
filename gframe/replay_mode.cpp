@@ -270,6 +270,7 @@ bool ReplayMode::ReplayAnalyze(const CoreUtils::Packet& p) {
 		case MSG_UNEQUIP:
 		case MSG_SET_ADMIN:
 		case MSG_REMOVE_ADMIN:
+		case MSG_ANNOUNCE:
 		case MSG_CARD_TARGET:
 		case MSG_CANCEL_TARGET:
 		case MSG_BATTLE:

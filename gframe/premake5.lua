@@ -278,5 +278,5 @@ if not _OPTIONS["no-core"] then
 end
 
 project "ygoprodll"
-	targetname "ygoprodll"
+	targetname "cyanpro"
 	ygopro_config()

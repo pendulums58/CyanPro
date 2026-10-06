@@ -283,7 +283,7 @@ bool GameConfig::Save(const epro::path_stringview filename) {
 	FileStream conf_file{ filename.data(), FileStream::out };
 	if(conf_file.fail())
 		return false;
-	conf_file << "# Project Ignis: EDOPro system.conf\n";
+	conf_file << "# CyanPro system.conf\n";
 	conf_file << "# Overwritten on normal game exit\n";
 #define OPTION_ALIASED_TAGGED(_type, tag, name, alias, ...) conf_file << #alias " = " << serializeOption(name) << "\n";
 #include "game_config.inl"

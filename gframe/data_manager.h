@@ -183,6 +183,8 @@ public:
 	std::wstring FormatLinkMarker(uint32_t link_marker) const;
 
 	std::unordered_map<uint32_t, CardDataM> cards;
+	std::unordered_map<uint32_t, uint32_t> key_unlock_map;
+	void RebuildKeyUnlockMap();
 
 	static constexpr auto unknown_string = L"???"sv;
 	static void CardReader(void* payload, uint32_t code, OCG_CardData* data);

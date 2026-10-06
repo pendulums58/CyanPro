@@ -3,6 +3,8 @@
 #include "compiler_features.h"
 #include "dll.h"
 #include "fmt.h"
+#include "logging.h"
+#include "utils.h"
 
 #define X(type,name,...) extern "C" type name(__VA_ARGS__);
 #include "ocgcore_functions.inl"
@@ -65,10 +67,19 @@ std::shared_ptr<const Core> Core::Load(epro::path_stringview path) {
 	if(!library)
 		return nullptr;
 	auto core = std::shared_ptr<Core>(new Core{});
-#define X(type,name,...) if((core->name = library.GetFunction<decltype(Core::name)>(#name)) == nullptr) return nullptr;
+#define X(type,name,...) \
+	if((core->name = library.GetFunction<decltype(Core::name)>(#name)) == nullptr) { \
+		ygo::ErrorLog("Core at {} rejected: missing function {}", ygo::Utils::ToUTF8IfNeeded(core_path), #name); \
+		return nullptr; \
+	}
 #include "ocgcore_functions.inl"
-	if(!core->check_api_version())
+	if(!core->check_api_version()) {
+		ygo::ErrorLog("Core at {} rejected: version {}.{}, expected {}.{}",
+			ygo::Utils::ToUTF8IfNeeded(core_path),
+			core->ver_major, core->ver_minor,
+			EXPECTED_VERSION_MAJOR, EXPECTED_VERSION_MINOR);
 		return nullptr;
+	}
 	core->library = std::move(library);
 	return core;
 }

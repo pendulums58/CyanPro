@@ -8,6 +8,9 @@ EDOPro(Project Ignis)의 수정판입니다. 오리카 전용 시스템
 
 ## 빌드
 
+upstream 빌드 의존성(irrlicht, libgit2, freetype, openssl 등)은
+[EDOPro 빌드 가이드](https://github.com/edo9300/edopro/wiki)를 참조하세요.
+
 ### 요구사항
 
 - Visual Studio 2022 (v143 toolset)
@@ -22,7 +25,7 @@ EDOPro(Project Ignis)의 수정판입니다. 오리카 전용 시스템
 ### 빌드
 
 ```
-msbuild.exe -m -p:Configuration=Release -p:Platform=Win32 -p:WholeProgramOptimization=false .\build\ygo.sln -t:ygoprodll
+msbuild.exe -m -p:Configuration=Release -p:Platform=Win32 .\build\ygo.sln -t:ygoprodll
 ```
 
 출력: `bin\release\cyanpro.exe`
@@ -32,8 +35,8 @@ msbuild.exe -m -p:Configuration=Release -p:Platform=Win32 -p:WholeProgramOptimiz
 | 설정 | 위치 | 설명 |
 |------|------|------|
 | `--sound=miniaudio` | premake 옵션 | miniaudio 오디오 백엔드 활성화 |
-| `--no-direct3d` | premake 옵션 | DirectX SDK 없이 빌드 (OpenGL 사용) |
-| `/p:WholeProgramOptimization=false` | MSBuild 플래그 | vcpkg 라이브러리와 LTO 비호환 회피 |
+| `--no-direct3d` | premake 옵션 | DirectX SDK가 없는 환경용. DXSDK_DIR이 설정되어 있으면 생략 가능 |
+| LTO/LTCG | `premake5.lua:291-297` | 주석 처리로 비활성화됨. vcpkg 라이브러리가 다른 컴파일러 버전으로 빌드되어 LTCG 비호환 |
 | `targetname "cyanpro"` | `gframe/premake5.lua:281` | 출력 파일명 |
 | `cppdialect "C++17"` | `gframe/premake5.lua:3` | irrlicht 호환 |
 

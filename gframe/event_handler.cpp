@@ -561,7 +561,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						selectable_cards.push_back(_pcard);
 					if(pcard->adminCard)
 						selectable_cards.push_back(pcard->adminCard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(pcard->adminCard ? 1095 : 1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_SZONE: {
@@ -570,7 +570,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						selectable_cards.push_back(_pcard);
 					if(pcard->adminCard)
 						selectable_cards.push_back(pcard->adminCard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(pcard->adminCard ? 1095 : 1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {
@@ -1180,7 +1180,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						selectable_cards.push_back(pcard);
 					if(clicked_card->adminCard)
 						selectable_cards.push_back(clicked_card->adminCard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(clicked_card->adminCard ? 1095 : 1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {
@@ -1224,7 +1224,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						selectable_cards.push_back(clicked_card->overlayed[i]);
 					if(clicked_card->adminCard)
 						selectable_cards.push_back(clicked_card->adminCard);
-					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(1007), selectable_cards.size()).data());
+					mainGame->wCardSelect->setText(epro::format(L"{}({})", gDataManager->GetSysString(clicked_card->adminCard ? 1095 : 1007), selectable_cards.size()).data());
 					break;
 				}
 				case LOCATION_GRAVE: {

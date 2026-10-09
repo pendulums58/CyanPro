@@ -669,8 +669,9 @@ void Game::Initialize() {
 	cbCardType2 = AlignElementWithParent(AddComboBox(env, Scale(130, 3, 190, 23), wFilter, COMBOBOX_SECONDTYPE));
 	cbCardType2->setMaxSelectionRows(20);
 	cbCardType2->addItem(gDataManager->GetSysString(1310).data(), 0);
-	chkAnime = AlignElementWithParent(env->addCheckBox(gGameConfig->chkAnime, Scale(10, 96, 150, 118), wFilter, CHECKBOX_SHOW_ANIME, gDataManager->GetSysString(1999).data()));
+	chkAnime = AlignElementWithParent(env->addCheckBox(true, Scale(10, 96, 150, 118), wFilter, CHECKBOX_SHOW_ANIME, gDataManager->GetSysString(1999).data()));
 	defaultStrings.emplace_back(chkAnime, 1999);
+	chkAnime->setVisible(false);
 	stLimit = env->addStaticText(gDataManager->GetSysString(1315).data(), Scale(205, 5, 280, 25), false, false, wFilter);
 	defaultStrings.emplace_back(stLimit, 1315);
 	cbLimit = AlignElementWithParent(AddComboBox(env, Scale(260, 3, 390, 23), wFilter, COMBOBOX_OTHER_FILT));
@@ -3377,7 +3378,7 @@ void Game::RefreshUICoreVersion() {
 	auto label = corename.length()
 		? epro::format(gDataManager->GetSysString(2013), ocgcore->ver_major, ocgcore->ver_minor, corename)
 		: epro::format(gDataManager->GetSysString(2010), ocgcore->ver_major, ocgcore->ver_minor);
-	if(ocgcore->ver_minor == 3)
+	if(ocgcore->ver_minor == OCG_VERSION_MINOR)
 		label.insert(0, L"[ORICA] ");
 	stCoreVersion->setText(label.data());
 	auto w1 = stVersion->getTextWidth();

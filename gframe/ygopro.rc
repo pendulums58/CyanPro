@@ -6,8 +6,8 @@
 1 ICON "cyanpro.ico"
 
 1 VERSIONINFO
-FILEVERSION 41, 0, 2, 0
-PRODUCTVERSION 41, 0, 2, 0
+FILEVERSION 1, 0, 0, 0
+PRODUCTVERSION 1, 0, 0, 0
 FILEOS 0x4
 FILETYPE 0x1
 
@@ -18,9 +18,9 @@ BEGIN
 		BEGIN
 			VALUE "OriginalFilename", "CyanPro.exe"
 			VALUE "InternalName", "ygoprodll"
-			VALUE "FileVersion", "41.0.2.0"
+			VALUE "FileVersion", "1.0.0.0"
 			VALUE "ProductName", "CyanPro"
-			VALUE "ProductVersion", "41.0.2.0"
+			VALUE "ProductVersion", "1.0.0.0"
 			VALUE "LegalCopyright", "Copyright (C) 2020-2026 edo9300 and others"
 			VALUE "CompanyName", "CyanPro"
 			VALUE "FileDescription", "CyanPro, automatic duel simulator"

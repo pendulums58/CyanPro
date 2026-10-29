@@ -1043,8 +1043,21 @@ void Game::DrawSpec() {
 			msgloc -= irr::core::vector2di(Scale(-2), (i + 1) * chatrect.getHeight() + Scale(1));
 			auto shadowloc = msgloc + irr::core::vector2di(1, 1);
 			driver->draw2DRectangle(rectloc, 0xa0000000, 0xa0000000, 0xa0000000, 0xa0000000);
-			textFont->drawustring(chatMsg[i], msgloc, 0xff000000, false, false);
-			textFont->drawustring(chatMsg[i], shadowloc, chatColor[chatType[i]], false, false);
+			if(!chatSegments[i].empty() && chatSegments[i][0].color.getAlpha() > 0) {
+				int xoff = 0;
+				for(const auto& seg : chatSegments[i]) {
+					auto segRect = msgloc;
+					segRect += irr::core::vector2di(xoff, 0);
+					auto segShadow = shadowloc;
+					segShadow += irr::core::vector2di(xoff, 0);
+					textFont->drawustring(seg.text, segRect, 0xff000000, false, false);
+					textFont->drawustring(seg.text, segShadow, seg.color, false, false);
+					xoff += textFont->getDimensionustring(seg.text).Width;
+				}
+			} else {
+				textFont->drawustring(chatMsg[i], msgloc, 0xff000000, false, false);
+				textFont->drawustring(chatMsg[i], shadowloc, chatColor[chatType[i]], false, false);
+			}
 		}
 	}
 }

@@ -1864,6 +1864,7 @@ bool ClientField::OnCommonEvent(const irr::SEvent& event, bool& stopPropagation)
 				mainGame->lstChat->clear();
 				for(int i = 0; i < 8; i++) {
 					mainGame->chatMsg[i].clear();
+					mainGame->chatSegments[i].clear();
 					mainGame->chatType[i] = 0;
 					mainGame->chatTiming[i] = 0;
 				}

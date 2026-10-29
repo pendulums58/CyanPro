@@ -65,6 +65,11 @@ namespace ygo {
 
 class GitRepo;
 
+struct ChatSegment {
+	std::wstring text;
+	irr::video::SColor color;
+};
+
 struct DuelInfo {
 	bool isInDuel;
 	bool isStarted;
@@ -565,6 +570,7 @@ public:
 	void ClearCardInfo(int player = 0);
 	void AddChatMsg(epro::wstringview msg, int player, int type);
 	void AddChatMsg(epro::wstringview name, epro::wstringview msg, int type);
+	static std::vector<ChatSegment> ParseChatMarkup(epro::wstringview text, irr::video::SColor baseColor, const DuelInfo& dInfo);
 	void AddLog(epro::wstringview msg, int param = 0);
 	void ClearChatMsg();
 	void AddDebugMsg(epro::stringview msg);
@@ -652,6 +658,7 @@ public:
 	std::list<FadingUnit> fadingList;
 	std::vector<int> logParam;
 	std::wstring chatMsg[8];
+	std::vector<ChatSegment> chatSegments[8];
 	std::map<std::string, RepoGui> repoInfoGui;
 
 	bool suspend{false};

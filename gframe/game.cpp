@@ -1,4 +1,5 @@
 #include <sstream>
+#include <cwctype>
 #include <nlohmann/json.hpp>
 #include <irrlicht.h>
 #include "client_updater.h"
@@ -2952,11 +2953,129 @@ void Game::ClearCardInfo(int player) {
 	cardimagetextureloading = false;
 	showingcard = 0;
 }
+namespace {
+struct NamedColor {
+	const wchar_t* name;
+	uint32_t value;
+};
+constexpr NamedColor colorPresets[] = {
+	{ L"red",    0xFFFF4444 }, { L"green",  0xFF44DD44 }, { L"blue",   0xFF5599FF },
+	{ L"yellow", 0xFFFFDD44 }, { L"orange", 0xFFFF9944 }, { L"purple", 0xFFBB77FF },
+	{ L"cyan",   0xFF44DDDD }, { L"pink",   0xFFFF88CC }, { L"white",  0xFFFFFFFF },
+	{ L"gray",   0xFFAAAAAA }, { L"gold",   0xFFFFCC33 },
+};
+irr::video::SColor ResolveColorName(epro::wstringview name, irr::video::SColor fallback) {
+	for(const auto& p : colorPresets) {
+		if(name.size() != std::wcslen(p.name))
+			continue;
+		bool match = true;
+		for(size_t i = 0; i < name.size(); ++i) {
+			if(std::towlower(name[i]) != p.name[i]) { match = false; break; }
+		}
+		if(match)
+			return irr::video::SColor(p.value);
+	}
+	if(name.size() == 6) {
+		uint32_t hex = 0;
+		bool valid = true;
+		for(size_t i = 0; i < 6; ++i) {
+			hex <<= 4;
+			wchar_t ch = name[i];
+			if(ch >= L'0' && ch <= L'9') hex |= (ch - L'0');
+			else if(ch >= L'a' && ch <= L'f') hex |= (ch - L'a' + 10);
+			else if(ch >= L'A' && ch <= L'F') hex |= (ch - L'A' + 10);
+			else { valid = false; break; }
+		}
+		if(valid)
+			return irr::video::SColor(0xFF000000 | hex);
+	}
+	return fallback;
+}
+std::wstring ResolvePlayerToken(epro::wstringview token, const DuelInfo& dInfo) {
+	auto safeName = [](const std::vector<std::wstring>& names, size_t idx, const wchar_t* fallback) -> std::wstring {
+		if(idx < names.size() && !names[idx].empty())
+			return names[idx];
+		return fallback;
+	};
+	if(token == L"p0") {
+		if(dInfo.isFirst)
+			return safeName(dInfo.selfnames, 0, L"Player 1");
+		return safeName(dInfo.opponames, 0, L"Player 1");
+	}
+	if(token == L"p1") {
+		if(dInfo.isFirst)
+			return safeName(dInfo.opponames, 0, L"Player 2");
+		return safeName(dInfo.selfnames, 0, L"Player 2");
+	}
+	if(token == L"pme")
+		return safeName(dInfo.selfnames, 0, L"Player 1");
+	if(token == L"pop")
+		return safeName(dInfo.opponames, 0, L"Player 2");
+	return {};
+}
+void SubstitutePlayerTokens(std::wstring& text, const DuelInfo& dInfo) {
+	size_t pos = 0;
+	while(pos < text.size()) {
+		if(text[pos] != L'[') { ++pos; continue; }
+		if(pos + 2 >= text.size() || text[pos + 1] != L'p') { ++pos; continue; }
+		auto end = text.find(L']', pos + 2);
+		if(end == std::wstring::npos) { ++pos; continue; }
+		auto token = epro::wstringview(text.data() + pos + 1, end - pos - 1);
+		auto replacement = ResolvePlayerToken(token, dInfo);
+		if(replacement.empty()) { pos = end + 1; continue; }
+		text.replace(pos, end - pos + 1, replacement);
+		pos += replacement.size();
+	}
+}
+}
+
+std::vector<ChatSegment> Game::ParseChatMarkup(epro::wstringview text, irr::video::SColor baseColor, const DuelInfo& dInfo) {
+	std::vector<ChatSegment> result;
+	std::vector<irr::video::SColor> colorStack;
+	colorStack.push_back(baseColor);
+	size_t pos = 0;
+	std::wstring accum;
+	auto flush = [&]() {
+		if(accum.empty()) return;
+		SubstitutePlayerTokens(accum, dInfo);
+		result.push_back({ std::move(accum), colorStack.back() });
+		accum.clear();
+	};
+	while(pos < text.size()) {
+		if(text[pos] == L'[') {
+			if(text.substr(pos).size() >= 4 && text.substr(pos, 3) == L"[c=") {
+				auto end = text.find(L']', pos + 3);
+				if(end != epro::wstringview::npos) {
+					flush();
+					auto colorName = text.substr(pos + 3, end - pos - 3);
+					auto color = ResolveColorName(colorName, colorStack.back());
+					colorStack.push_back(color);
+					pos = end + 1;
+					continue;
+				}
+			}
+			if(text.substr(pos).size() >= 4 && text.substr(pos, 4) == L"[/c]") {
+				flush();
+				if(colorStack.size() > 1)
+					colorStack.pop_back();
+				pos += 4;
+				continue;
+			}
+		}
+		accum += text[pos];
+		++pos;
+	}
+	flush();
+	if(result.empty())
+		result.push_back({ std::wstring(), baseColor });
+	return result;
+}
 void Game::AddChatMsg(epro::wstringview msg, int player, int type) {
 	for(int i = 7; i > 0; --i) {
 		chatMsg[i].swap(chatMsg[i - 1]);
 		chatTiming[i] = chatTiming[i - 1];
 		chatType[i] = chatType[i - 1];
+		chatSegments[i].swap(chatSegments[i - 1]);
 	}
 	chatTiming[0] = 1200.0f;
 	chatType[0] = player;
@@ -2985,6 +3104,16 @@ void Game::AddChatMsg(epro::wstringview msg, int player, int type) {
 		}
 	}
 	chatMsg[0] = epro::format(L"{}: {}", sender, msg);
+	if(player == 8 && type == 2) {
+		static constexpr uint32_t announceBaseColor = 0xff8080ff;
+		auto prefix = epro::format(L"{}: ", sender);
+		chatSegments[0].clear();
+		chatSegments[0].push_back({ std::wstring(prefix), irr::video::SColor(announceBaseColor) });
+		auto body = ParseChatMarkup(msg, irr::video::SColor(announceBaseColor), dInfo);
+		chatSegments[0].insert(chatSegments[0].end(), std::make_move_iterator(body.begin()), std::make_move_iterator(body.end()));
+	} else {
+		chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor() }};
+	}
 	lstChat->addItem(chatMsg[0].data());
 }
 void Game::AddChatMsg(epro::wstringview name, epro::wstringview msg, int type) {
@@ -2992,6 +3121,7 @@ void Game::AddChatMsg(epro::wstringview name, epro::wstringview msg, int type) {
 		chatMsg[i].swap(chatMsg[i - 1]);
 		chatTiming[i] = chatTiming[i - 1];
 		chatType[i] = chatType[i - 1];
+		chatSegments[i].swap(chatSegments[i - 1]);
 	}
 	chatTiming[0] = 1200.0f;
 	switch(type) {
@@ -3013,6 +3143,7 @@ void Game::AddChatMsg(epro::wstringview name, epro::wstringview msg, int type) {
 		chatMsg[0] = epro::format(L"{}: {}", name, msg);
 	else
 		chatMsg[0] = epro::format(L"System: {}", msg);
+	chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor() }};
 	lstChat->addItem(chatMsg[0].data());
 	gSoundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 }
@@ -3026,6 +3157,7 @@ void Game::AddLog(epro::wstringview msg, int param) {
 void Game::ClearChatMsg() {
 	for(int i = 7; i >= 0; --i) {
 		chatTiming[i] = 0;
+		chatSegments[i].clear();
 	}
 }
 void Game::AddDebugMsg(epro::stringview msg) {

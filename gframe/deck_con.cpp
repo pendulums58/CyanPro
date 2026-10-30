@@ -1186,7 +1186,7 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 	mainGame->scrFilter->setPos(0);
 }
 bool DeckBuilder::CheckCardProperties(const CardDataM& data) {
-	if(data._data.type & TYPE_TOKEN || data._data.ot & SCOPE_HIDDEN)
+	if(data._data.type & (TYPE_TOKEN | TYPE_UNLOCKED) || data._data.ot & SCOPE_HIDDEN)
 		return false;
 	switch(filter_type) {
 	case CARD_TYPE_FILTER_MONSTER: {

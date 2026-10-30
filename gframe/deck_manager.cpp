@@ -355,7 +355,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, const cardlist_type& mainlist, const 
 				continue;
 			}
 		}
-		if(!cd || cd->type & TYPE_TOKEN)
+		if(!cd || cd->type & (TYPE_TOKEN | TYPE_UNLOCKED))
 			continue;
 		else if((!extralist || cd->code != 0) && is_extra_deck_card(cd))  {
 			deck.extra.push_back(cd);
@@ -372,7 +372,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, const cardlist_type& mainlist, const 
 					continue;
 				}
 			}
-			if(!cd || cd->type & TYPE_TOKEN)
+			if(!cd || cd->type & (TYPE_TOKEN | TYPE_UNLOCKED))
 				continue;
 			deck.extra.push_back(cd);
 		}
@@ -385,7 +385,7 @@ uint32_t DeckManager::LoadDeck(Deck& deck, const cardlist_type& mainlist, const 
 				continue;
 			}
 		}
-		if(!cd || cd->type & TYPE_TOKEN)
+		if(!cd || cd->type & (TYPE_TOKEN | TYPE_UNLOCKED))
 			continue;
 		deck.side.push_back(cd);
 	}

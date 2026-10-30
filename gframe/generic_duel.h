@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <set>
+#include <string>
 #include <type_traits>
 #include "config.h"
 #include "network.h"
@@ -149,6 +150,10 @@ protected:
 	std::vector<uint8_t> match_result;
 	uint16_t time_limit[2];
 	int16_t grace_period;
+	// duel stats reporting
+	std::string stat_duel_id;     // this duel's seed (unique id)
+	std::string stat_match_id;    // seed of the match's first duel
+	int stat_game_no = 0;         // duel number within the match
 };
 
 }

@@ -1,10 +1,128 @@
 #include <algorithm>
+#include <cstdio>
+#include <sstream>
+#include <thread>
 #include "generic_duel.h"
 #include "netserver.h"
 #include "game.h"
 #include "core_utils.h"
+#include "curl.h"
+#include "config.h"
+#include "game_config.h"
+#include "data_manager.h"
+#include "bufferio.h"
+#include "logging.h"
 
 namespace ygo {
+
+namespace {
+
+// Duel stats endpoint. Empty = reporting disabled (set after the Worker is deployed).
+constexpr const char STATS_ENDPOINT[] = "";
+
+void PostDuelStats(std::string payload) {
+	if(!*STATS_ENDPOINT) {
+		static bool logged = false;
+		if(!logged) {
+			logged = true;
+			ErrorLog("Duel stats: STATS_ENDPOINT is empty, reporting disabled");
+		}
+		return;
+	}
+	// Send on a detached thread so the duel flow never blocks; failures go to error.log.
+	std::thread([payload = std::move(payload)]() {
+		CURL* curl = curl_easy_init();
+		if(!curl) {
+			ErrorLog("Duel stats: curl_easy_init failed");
+			return;
+		}
+		char curl_error_buffer[CURL_ERROR_SIZE]{};
+		curl_slist* headers = nullptr;
+		headers = curl_slist_append(headers, "Content-Type: application/json");
+		curl_easy_setopt(curl, CURLOPT_URL, STATS_ENDPOINT);
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.data());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(payload.size()));
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 10L);
+		curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+		curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_error_buffer);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		if(!gGameConfig->ssl_certificate_path.empty())
+			curl_easy_setopt(curl, CURLOPT_CAINFO, gGameConfig->ssl_certificate_path.data());
+		const auto res = curl_easy_perform(curl);
+		if(res != CURLE_OK) {
+			ErrorLog("Duel stats: curl error ({}) {} ({})", static_cast<int>(res), curl_easy_strerror(res), curl_error_buffer);
+		} else {
+			long status = 0;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &status);
+			if(status < 200 || status >= 300)
+				ErrorLog("Duel stats: server returned HTTP {}", status);
+		}
+		curl_slist_free_all(headers);
+		curl_easy_cleanup(curl);
+	}).detach();
+}
+
+// DuelPlayer::name is UTF-16; wchar_t width differs per platform, so never cast directly.
+std::string PlayerName(const DuelPlayer* player) {
+	if(!player)
+		return {};
+	wchar_t wname[20]{};
+	BufferIO::DecodeUTF16(player->name, wname, 20);
+	return BufferIO::EncodeUTF8(wname);
+}
+
+// Nicknames may contain quotes or backslashes, which would break the JSON body.
+std::string JsonEscape(const std::string& in) {
+	std::string out;
+	out.reserve(in.size() + 8);
+	for(unsigned char c : in) {
+		switch(c) {
+		case '"':  out += "\\\""; break;
+		case '\\': out += "\\\\"; break;
+		case '\n': out += "\\n"; break;
+		case '\r': out += "\\r"; break;
+		case '\t': out += "\\t"; break;
+		default:
+			if(c < 0x20) {
+				char buf[7];
+				std::snprintf(buf, sizeof(buf), "\\u%04x", c);
+				out += buf;
+			} else {
+				out += static_cast<char>(c);   // UTF-8 bytes pass through
+			}
+		}
+	}
+	return out;
+}
+
+// WindBot always connects as name="[AI] {name}" (windbot.cpp, all three launch paths).
+bool IsBotName(const uint16_t* name) {
+	static constexpr uint16_t prefix[] = { '[', 'A', 'I', ']', ' ' };
+	for(size_t i = 0; i < sizeof(prefix) / sizeof(prefix[0]); ++i) {
+		if(name[i] != prefix[i])
+			return false;
+	}
+	return true;
+}
+
+void AppendCardArray(std::ostringstream& out, const char* key, const Deck::Vector& cards) {
+	out << '"' << key << "\":[";
+	bool first = true;
+	for(const auto* card : cards) {
+		if(!card)
+			continue;
+		if(!first)
+			out << ',';
+		first = false;
+		out << card->code;
+	}
+	out << ']';
+}
+
+}
 
 ReplayStream GenericDuel::replay_stream;
 
@@ -575,6 +693,17 @@ void GenericDuel::TPResult(DuelPlayer* dp, uint8_t tp) {
 	const auto seed = Utils::GetRandomNumberGeneratorSeed();
 	auto replay_header = ExtendedReplayHeader::CreateDefaultHeader(REPLAY_YRP1, static_cast<uint32_t>(time(nullptr)));
 	replay_header.SetSeed(seed);
+	// The replay seed doubles as the duel id: fresh per duel, so it never repeats.
+	{
+		char buf[65];
+		std::snprintf(buf, sizeof(buf), "%016llx%016llx%016llx%016llx",
+					  static_cast<unsigned long long>(seed[0]), static_cast<unsigned long long>(seed[1]),
+					  static_cast<unsigned long long>(seed[2]), static_cast<unsigned long long>(seed[3]));
+		stat_duel_id = buf;
+		++stat_game_no;
+		if(stat_match_id.empty())
+			stat_match_id = stat_duel_id;   // first duel of the match
+	}
 	last_replay.BeginRecord(true, EPRO_TEXT("./replay/_LastReplay.yrp"));
 	last_replay.WriteHeader(replay_header);
 	//records the replay with the new system
@@ -744,6 +873,48 @@ void GenericDuel::Process() {
 }
 void GenericDuel::DuelEndProc() {
 	EndDuel();
+	// ---- duel stats report ----
+	// Must run before the match-end branch below overwrites pdeck with odeck.
+	// match_result's 0 / 1 are the current home / opposing, the same order IteratePlayers uses.
+	if(!match_result.empty() && !stat_duel_id.empty()) {
+		const int winner = match_result.back();
+		std::vector<const duelist*> seats;
+		IteratePlayers([&seats](duelist& d) { seats.push_back(&d); });
+		bool has_bot = false;
+		for(const auto* d : seats) {
+			if(d->player && IsBotName(d->player->name))
+				has_bot = true;
+		}
+		// Skip tag/relay (more than 2 seats) and any duel with a bot
+		if(seats.size() == 2 && !has_bot) {
+			std::ostringstream js;
+			js << '{'
+			   << "\"duel_id\":\"" << stat_duel_id << "\","
+			   << "\"match_id\":\"" << stat_match_id << "\","
+			   << "\"game_no\":" << stat_game_no << ','
+			   << "\"winner\":" << winner << ','
+			   << "\"format\":\"" << JsonEscape(BufferIO::EncodeUTF8(gdeckManager->GetLFListName(host_info.lflist))) << "\","
+			   << "\"ended_at\":" << static_cast<long long>(time(nullptr)) << ','
+			   << "\"version\":\"" << EDOPRO_VERSION_MAJOR << '.' << EDOPRO_VERSION_MINOR << '.' << EDOPRO_VERSION_PATCH << "\","
+			   << "\"players\":[";
+			for(size_t i = 0; i < seats.size(); ++i) {
+				const Deck& deck = seats[i]->pdeck;
+				if(i)
+					js << ',';
+				js << "{\"seat\":" << i
+				   << ",\"name\":\"" << JsonEscape(PlayerName(seats[i]->player)) << '"'
+				   << ",\"deck\":{";
+				AppendCardArray(js, "main", deck.main);
+				js << ',';
+				AppendCardArray(js, "extra", deck.extra);
+				js << ',';
+				AppendCardArray(js, "side", deck.side);
+				js << "}}";
+			}
+			js << "]}";
+			PostDuelStats(js.str());
+		}
+	}
 	packets_cache.clear();
 	int winc[3] = { 0, 0, 0 };
 	for(size_t i = 0; i < match_result.size(); ++i)
@@ -751,6 +922,8 @@ void GenericDuel::DuelEndProc() {
 	int minvictories = (int)std::ceil(best_of / 2.0);
 	if(match_kill || (winc[0] >= minvictories || winc[1] >= minvictories) || (int)match_result.size() >= best_of) {
 		seeking_rematch = true;
+		stat_match_id.clear();
+		stat_game_no = 0;
 		NetServer::SendPacketToPlayer(nullptr, STOC_WAITING_REMATCH);
 		ResendToAll();
 		NetServer::SendPacketToPlayer(nullptr, STOC_REMATCH);

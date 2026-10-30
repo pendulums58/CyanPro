@@ -17,8 +17,8 @@ namespace ygo {
 
 namespace {
 
-// Duel stats endpoint. Empty = reporting disabled (set after the Worker is deployed).
-constexpr const char STATS_ENDPOINT[] = "";
+// Duel stats endpoint. Empty = reporting disabled.
+constexpr const char STATS_ENDPOINT[] = "https://cyanpro-stats.cyanpro.workers.dev/duels";
 
 void PostDuelStats(std::string payload) {
 	if(!*STATS_ENDPOINT) {

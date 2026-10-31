@@ -3641,12 +3641,14 @@ void Game::ReloadCBAttribute() {
 void Game::ReloadCBRace() {
 	cbRace->clear();
 	cbRace->addItem(gDataManager->GetSysString(1310).data(), 0);
-	//currently corresponding to RACE_GALAXY
-	static constexpr auto CURRENTLY_KNOWN_RACES = 32;
+	//currently corresponding to RACE_ILLUSION
+	static constexpr auto CURRENTLY_KNOWN_RACES = 26;
+	//bits 26-31 were the Rush Duel races; their strings still ship in strings.conf, so skip them explicitly
+	static constexpr auto RUSH_RACES_END = 32;
 	uint32_t i = 0;
 	for(; i < CURRENTLY_KNOWN_RACES; ++i)
 		cbRace->addItem(gDataManager->GetSysString(gDataManager->GetRaceStringIndex(i)).data(), i + 1);
-	for(; i < 64; ++i) {
+	for(i = RUSH_RACES_END; i < 64; ++i) {
 		auto idx = gDataManager->GetRaceStringIndex(i);
 		if(gDataManager->HasSysString(idx))
 			cbRace->addItem(gDataManager->GetSysString(idx).data(), i + 1);

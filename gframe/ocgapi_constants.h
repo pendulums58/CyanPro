@@ -109,14 +109,8 @@ inline bool is_extra_deck_type(uint32_t type) {
 #define RACE_WYRM         0x800000
 #define RACE_CYBERSE      0x1000000
 #define RACE_ILLUSION     0x2000000
-#define RACE_CYBORG       0x4000000
-#define RACE_MAGICALKNIGHT     0x8000000
-#define RACE_HIGHDRAGON        0x10000000
-#define RACE_OMEGAPSYCHIC      0x20000000
-#define RACE_CELESTIALWARRIOR  0x40000000
-#define RACE_GALAXY            0x80000000
 #define RACE_YOKAI             0x4000000000000000
-#define RACE_MAX               RACE_GALAXY
+#define RACE_MAX               RACE_ILLUSION
 #define RACE_ALL               (((((uint64_t)RACE_MAX)<<1)-1)|RACE_YOKAI)
 
 /* Event Reasons */

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstdio>
+#include <map>
 #include <sstream>
 #include <thread>
 #include "generic_duel.h"
@@ -901,8 +902,13 @@ void GenericDuel::DuelEndProc() {
 				const Deck& deck = seats[i]->pdeck;
 				if(i)
 					js << ',';
+				const DuelPlayer* who = seats[i]->player;
+				auto found = stat_player_no.find(who);
+				if(found == stat_player_no.end())
+					found = stat_player_no.emplace(who, static_cast<int>(stat_player_no.size())).first;
 				js << "{\"seat\":" << i
-				   << ",\"name\":\"" << JsonEscape(PlayerName(seats[i]->player)) << '"'
+				   << ",\"player_no\":" << found->second
+				   << ",\"name\":\"" << JsonEscape(PlayerName(who)) << '"'
 				   << ",\"deck\":{";
 				AppendCardArray(js, "main", deck.main);
 				js << ',';
@@ -924,6 +930,7 @@ void GenericDuel::DuelEndProc() {
 		seeking_rematch = true;
 		stat_match_id.clear();
 		stat_game_no = 0;
+		stat_player_no.clear();
 		NetServer::SendPacketToPlayer(nullptr, STOC_WAITING_REMATCH);
 		ResendToAll();
 		NetServer::SendPacketToPlayer(nullptr, STOC_REMATCH);

@@ -2,6 +2,7 @@
 #define GENERIC_DUEL_H
 
 #include <cstdint>
+#include <map>
 #include <set>
 #include <string>
 #include <type_traits>
@@ -154,6 +155,12 @@ protected:
 	std::string stat_duel_id;     // this duel's seed (unique id)
 	std::string stat_match_id;    // seed of the match's first duel
 	int stat_game_no = 0;         // duel number within the match
+	// Seats are not stable across a match: TPResult() swaps the home / opposing
+	// vectors when the loser elects to go second, so seat 0 in game 2 can be a
+	// different person than seat 0 in game 1. DuelPlayer* is stable for the whole
+	// match, so hand each one a fixed player_no on first sight and report that
+	// alongside the seat. Cleared when the match ends.
+	std::map<const DuelPlayer*, int> stat_player_no;
 };
 
 }

@@ -54,7 +54,14 @@ $dll = Join-Path $root "ocgcore\bin\release\shared\ocgcore.dll"
 $install = Join-Path $root "..\CyanPro-Release"
 $out = Join-Path $root "release-out\$ver"
 Step "파일 모으기 → $out"
-if(Test-Path $out) { Remove-Item $out -Recurse -Force }
+if(Test-Path $out) {
+	# 업로드 중이거나 열려 있는 파일이 있으면 아무것도 지우기 전에 멈춘다
+	foreach($f in Get-ChildItem $out -File) {
+		try { $f.Open("Open", "ReadWrite", "None").Dispose() }
+		catch { throw "$($f.Name) 이(가) 다른 프로그램에서 사용 중. 업로드나 탐색기를 닫고 다시 실행할 것" }
+	}
+	Remove-Item $out -Recurse -Force
+}
 New-Item -ItemType Directory -Force $out | Out-Null
 
 # 릴리스 노트: tools\release_notes\template.md + <버전>.md + 실제 커밋

@@ -53,3 +53,5 @@ NotoSansJP-Regular.otf
 *.ilk
 *.idb
 *.log
+# Release staging (release.bat)
+/release-out/

@@ -1026,7 +1026,7 @@ void Game::DrawSpec() {
 		hideChatTimer--;
 	}
 	for(int i = 0; i < 8; ++i) {
-		static constexpr uint32_t chatColor[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xff8080ff, 0xffff4040, 0xffff4040,
+		static constexpr uint32_t chatColor[] = {0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, 0xffff4040, 0xffff4040,
 										   0xffff4040, 0xff40ff40, 0xff4040ff, 0xff40ffff, 0xffff40ff, 0xffffff40, 0xffffffff, 0xff808080, 0xff404040};
 		if(chatTiming[i] > 0.0f) {
 			chatTiming[i] -= (float)delta_time * 60.0f / 1000.0f;

@@ -3105,7 +3105,7 @@ void Game::AddChatMsg(epro::wstringview msg, int player, int type) {
 	}
 	chatMsg[0] = epro::format(L"{}: {}", sender, msg);
 	if(player == 8 && type == 2) {
-		static constexpr uint32_t announceBaseColor = 0xff8080ff;
+		static constexpr uint32_t announceBaseColor = 0xffffffff;
 		auto prefix = epro::format(L"{}: ", sender);
 		chatSegments[0].clear();
 		chatSegments[0].push_back({ std::wstring(prefix), irr::video::SColor(announceBaseColor) });

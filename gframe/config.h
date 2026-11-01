@@ -25,4 +25,9 @@ extern bool show_changelog;
 #define GET_CORE_VERSION_MINOR(ver) ((ver >> 24) & 0xff)
 #define EXPAND_VERSION(ver) GET_CLIENT_VERSION_MAJOR(ver), GET_CLIENT_VERSION_MINOR(ver), GET_CORE_VERSION_MAJOR(ver), GET_CORE_VERSION_MINOR(ver)
 
+// Client self-update endpoint (see client_updater.cpp). premake's --update-url still overrides it.
+#ifndef UPDATE_URL
+#define UPDATE_URL "https://cyanpro-stats.cyanpro.workers.dev/update"
+#endif
+
 #endif

@@ -69,7 +69,8 @@ $notesText = (Get-Content (Join-Path $PSScriptRoot "release_notes\template.md") 
 	Replace("{VERSION}", $ver).Replace("{CODENAME}", $codename).Replace("{CHANGES}", $changes).
 	Replace("{CYANPRO_COMMIT}", (git rev-parse --short=8 HEAD)).
 	Replace("{CYANCORE_COMMIT}", (git -C ocgcore rev-parse --short=7 HEAD))
-$notesFile = Join-Path $out "RELEASE_NOTES.md"
+# 업로드 폴더에는 올릴 파일만 두고, 본문용 노트는 옆에 둔다
+$notesFile = Join-Path $root "release-out\$ver-notes.md"
 [IO.File]::WriteAllText($notesFile, $notesText, (New-Object Text.UTF8Encoding $false))
 
 & (Join-Path $PSScriptRoot "make_update_zip.ps1") -Exe $exe -CoreDll $dll -OutDir $out
@@ -78,8 +79,9 @@ Copy-Item $exe $out -Force
 
 Step "끝. GitHub 릴리스 v$ver 에 올릴 것"
 Write-Host "  제목: v$ver `"$codename`""
-Write-Host "  본문: RELEASE_NOTES.md 내용을 붙여넣기 (파일로는 안 올려도 됨)"
-Get-ChildItem $out -Exclude "RELEASE_NOTES.md" | ForEach-Object { Write-Host "  - $($_.Name)" }
+Write-Host "  본문: release-out\$ver-notes.md 내용을 붙여넣기"
+Write-Host "  파일: $out 안의 것 전부"
+Get-ChildItem $out | ForEach-Object { Write-Host "  - $($_.Name)" }
 Write-Host "`n  업데이트 zip 과 md5 가 빠지면 자동 업데이트가 뜨지 않는다."
 if($warnings) { Write-Host "`n[주의] $warnings 건 — 위 노란 줄 확인" -ForegroundColor Yellow }
 Invoke-Item $out

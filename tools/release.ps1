@@ -50,16 +50,21 @@ $exeVer = (Get-Item $exe).VersionInfo.FileVersion
 if($exeVer -ne "$ver.0") { throw "cyanpro.exe 버전이 $exeVer, config.h 는 $ver" }
 
 # 6. 올릴 파일 모으기
+$dll = Join-Path $root "ocgcore\bin\release\shared\ocgcore.dll"
+$install = Join-Path $root "..\CyanPro-Release"
+$notes = Get-Content (Join-Path $install "RELEASE_NOTES.md") -Raw -Encoding UTF8
+if($notes -notmatch [regex]::Escape($ver)) { Warn "CyanPro-Release\RELEASE_NOTES.md 에 $ver 이 없음 (예전 노트가 그대로 들어감)" }
 $out = Join-Path $root "release-out\$ver"
 Step "파일 모으기 → $out"
+if(Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory -Force $out | Out-Null
 Copy-Item $exe $out -Force
-& (Join-Path $PSScriptRoot "make_update_zip.ps1") -Exe $exe -OutDir $out
+& (Join-Path $PSScriptRoot "make_update_zip.ps1") -Exe $exe -CoreDll $dll -OutDir $out
+& (Join-Path $PSScriptRoot "make_full_zip.ps1") -Source $install -Exe $exe -CoreDll $dll -Version $ver -OutDir $out
 
 Step "끝. GitHub 릴리스 v$ver 에 올릴 것"
 Write-Host "  제목: v$ver `"$codename`""
 Get-ChildItem $out | ForEach-Object { Write-Host "  - $($_.Name)" }
-Write-Host "  - CyanPro-$ver-win32.zip  (전체 배포 zip 은 지금처럼 직접 만들어서)"
 Write-Host "`n  업데이트 zip 과 md5 가 빠지면 자동 업데이트가 뜨지 않는다."
 if($warnings) { Write-Host "`n[주의] $warnings 건 — 위 노란 줄 확인" -ForegroundColor Yellow }
 Invoke-Item $out

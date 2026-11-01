@@ -3112,7 +3112,7 @@ void Game::AddChatMsg(epro::wstringview msg, int player, int type) {
 		auto body = ParseChatMarkup(msg, irr::video::SColor(announceBaseColor), dInfo);
 		chatSegments[0].insert(chatSegments[0].end(), std::make_move_iterator(body.begin()), std::make_move_iterator(body.end()));
 	} else {
-		chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor() }};
+		chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor(0) }};
 	}
 	lstChat->addItem(chatMsg[0].data());
 }
@@ -3143,7 +3143,7 @@ void Game::AddChatMsg(epro::wstringview name, epro::wstringview msg, int type) {
 		chatMsg[0] = epro::format(L"{}: {}", name, msg);
 	else
 		chatMsg[0] = epro::format(L"System: {}", msg);
-	chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor() }};
+	chatSegments[0] = {{ std::wstring(chatMsg[0]), irr::video::SColor(0) }};
 	lstChat->addItem(chatMsg[0].data());
 	gSoundManager->PlaySoundEffect(SoundManager::SFX::CHAT);
 }

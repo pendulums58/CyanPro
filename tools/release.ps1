@@ -52,19 +52,34 @@ if($exeVer -ne "$ver.0") { throw "cyanpro.exe 버전이 $exeVer, config.h 는 $v
 # 6. 올릴 파일 모으기
 $dll = Join-Path $root "ocgcore\bin\release\shared\ocgcore.dll"
 $install = Join-Path $root "..\CyanPro-Release"
-$notes = Get-Content (Join-Path $install "RELEASE_NOTES.md") -Raw -Encoding UTF8
-if($notes -notmatch [regex]::Escape($ver)) { Warn "CyanPro-Release\RELEASE_NOTES.md 에 $ver 이 없음 (예전 노트가 그대로 들어감)" }
 $out = Join-Path $root "release-out\$ver"
 Step "파일 모으기 → $out"
 if(Test-Path $out) { Remove-Item $out -Recurse -Force }
 New-Item -ItemType Directory -Force $out | Out-Null
-Copy-Item $exe $out -Force
+
+# 릴리스 노트: tools\release_notes\template.md + <버전>.md + 실제 커밋
+$changesFile = Join-Path $PSScriptRoot "release_notes\$ver.md"
+if(Test-Path $changesFile) {
+	$changes = (Get-Content $changesFile -Raw -Encoding UTF8).Trim()
+} else {
+	Warn "tools\release_notes\$ver.md 가 없음 (변경 사항 칸이 비어서 나감)"
+	$changes = "- (작성 안 됨)"
+}
+$notesText = (Get-Content (Join-Path $PSScriptRoot "release_notes\template.md") -Raw -Encoding UTF8).
+	Replace("{VERSION}", $ver).Replace("{CODENAME}", $codename).Replace("{CHANGES}", $changes).
+	Replace("{CYANPRO_COMMIT}", (git rev-parse --short=8 HEAD)).
+	Replace("{CYANCORE_COMMIT}", (git -C ocgcore rev-parse --short=7 HEAD))
+$notesFile = Join-Path $out "RELEASE_NOTES.md"
+[IO.File]::WriteAllText($notesFile, $notesText, (New-Object Text.UTF8Encoding $false))
+
 & (Join-Path $PSScriptRoot "make_update_zip.ps1") -Exe $exe -CoreDll $dll -OutDir $out
-& (Join-Path $PSScriptRoot "make_full_zip.ps1") -Source $install -Exe $exe -CoreDll $dll -Version $ver -OutDir $out
+& (Join-Path $PSScriptRoot "make_full_zip.ps1") -Source $install -Exe $exe -CoreDll $dll -Notes $notesFile -Version $ver -OutDir $out
+Copy-Item $exe $out -Force
 
 Step "끝. GitHub 릴리스 v$ver 에 올릴 것"
 Write-Host "  제목: v$ver `"$codename`""
-Get-ChildItem $out | ForEach-Object { Write-Host "  - $($_.Name)" }
+Write-Host "  본문: RELEASE_NOTES.md 내용을 붙여넣기 (파일로는 안 올려도 됨)"
+Get-ChildItem $out -Exclude "RELEASE_NOTES.md" | ForEach-Object { Write-Host "  - $($_.Name)" }
 Write-Host "`n  업데이트 zip 과 md5 가 빠지면 자동 업데이트가 뜨지 않는다."
 if($warnings) { Write-Host "`n[주의] $warnings 건 — 위 노란 줄 확인" -ForegroundColor Yellow }
 Invoke-Item $out

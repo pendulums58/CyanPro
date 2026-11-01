@@ -2,22 +2,24 @@
 # Content comes from an allowlist over a working install (-Source), plus the
 # freshly built cyanpro.exe / ocgcore.dll. Anything not listed stays out:
 # repositories and expansions-2 (the client clones them on first launch),
-# script, replay, screenshots, puzzles, personal decks, logs.
-# config/system.conf is shipped with the personal fields reset to defaults.
+# script, replay, screenshots, puzzles, decks, logs.
+# config/system.conf is shipped with the personal fields reset to defaults,
+# and RELEASE_NOTES.md is the generated -Notes file, not the install's copy.
 param(
 	[Parameter(Mandatory)][string]$Source,
 	[Parameter(Mandatory)][string]$Exe,
 	[Parameter(Mandatory)][string]$CoreDll,
+	[Parameter(Mandatory)][string]$Notes,
 	[Parameter(Mandatory)][string]$Version,
 	[string]$OutDir = "."
 )
 $ErrorActionPreference = "Stop"
 $Source = (Resolve-Path $Source).Path
 
-$rootFiles = "COPYING.txt", "LICENSE.txt", "README.md.txt", "RELEASE_NOTES.md", "cacert.pem", "init.lua"
+$rootFiles = "COPYING.txt", "LICENSE.txt", "README.md.txt", "cacert.pem", "init.lua"
 $trees = "WindBot", "config", "fonts", "notices", "skin", "sound", "textures"
 $skip = { param($rel) $rel -like "*.log" -or $rel -eq "config/system.conf" }
-$emptyDirs = "pics/cover/", "pics/field/", "pics/temp/"
+$emptyDirs = "deck/", "pics/cover/", "pics/field/", "pics/temp/"
 # system.conf keys that hold the packager's own data, reset to game_config.inl defaults
 $resetKeys = [ordered]@{
 	nickname = "Player"; gamename = "Game"; lastdeck = ""; lasthost = "127.0.0.1"; lastport = "7911"
@@ -40,8 +42,7 @@ foreach($t in $trees) {
 		Add-File $_.FullName $rel
 	}
 }
-Get-ChildItem (Join-Path $Source "deck") -File -Filter "*.ydk" | Where-Object { $_.Name -like "``[Tactical-Try Deck``]*" } |
-	ForEach-Object { Add-File $_.FullName "deck/$($_.Name)" }
+Add-File (Resolve-Path $Notes).Path "RELEASE_NOTES.md"
 Add-File (Join-Path $Source "expansions\cards.cdb") "expansions/cards.cdb"
 Add-File (Resolve-Path $Exe).Path "cyanpro.exe"
 Add-File (Resolve-Path $CoreDll).Path "ocgcore.dll"

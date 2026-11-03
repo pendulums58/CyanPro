@@ -1,7 +1,8 @@
 ﻿# Builds the full distribution zip CyanPro-<ver>-win32.zip.
 # Content comes from an allowlist over a working install (-Source), plus the
 # freshly built cyanpro.exe / ocgcore.dll. Anything not listed stays out:
-# repositories and expansions-2 (the client clones them on first launch),
+# repositories, WindBot and expansions-2 (the client clones them on first launch;
+# a WindBot folder without .git is deleted and recloned anyway),
 # script, replay, screenshots, puzzles, decks, logs.
 # config/configs.json and user_configs.json come from tools/release_files/config.
 # config/system.conf is shipped with the personal fields reset to defaults,
@@ -18,7 +19,7 @@ $ErrorActionPreference = "Stop"
 $Source = (Resolve-Path $Source).Path
 
 $rootFiles = "COPYING.txt", "LICENSE.txt", "README.md.txt", "cacert.pem", "init.lua"
-$trees = "WindBot", "config", "fonts", "notices", "skin", "sound", "textures"
+$trees = "config", "fonts", "notices", "skin", "sound", "textures"
 # Repo lists come from tools/release_files/config, not the install, which may point at test repos
 $fixedConfigs = "configs.json", "user_configs.json"
 $skip = { param($rel) $rel -like "*.log" -or $rel -eq "config/system.conf" -or ($fixedConfigs | ForEach-Object { "config/$_" }) -contains $rel }

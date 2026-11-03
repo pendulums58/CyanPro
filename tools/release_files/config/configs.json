@@ -1,0 +1,63 @@
+{
+	"repos": [
+		{
+			"url": "https://github.com/pendulums58/CyanCore",
+			"repo_name": "CyanCore 엔진 업데이트",
+			"repo_path": "./repositories/CyanCore",
+			"has_core": true,
+			"core_path": "bin",
+			"data_path": "",
+			"script_path": "",
+			"should_update": true,
+			"should_read": true
+		},
+		{
+			"url": "https://github.com/pendulums58/CyanPro_CardDB",
+			"repo_name": "오리카 통합 팩",
+			"repo_path": "./repositories/OricaPack",
+			"should_update": false,
+			"should_read": true
+		},
+		{
+			"url": "https://github.com/pendulums58/CyanPro_WindBot",
+			"repo_name": "오리카 AI (WindBot)",
+			"repo_path": "./WindBot",
+			"should_update": true,
+			"should_read": true
+		},
+		{
+			"url": "https://github.com/Team-AllYGOPro/edopro-korean",
+			"repo_name": "한국어 패치",
+			"repo_path": "./repositories/languages/한국어",
+			"is_language": true,
+			"language": "한국어",
+			"should_update": true,
+			"should_read": true
+		},
+		{
+			"url": "https://github.com/Team-AllYGOPro/edopro-korean-delta",
+			"repo_name": "한국어 패치 업데이트",
+			"repo_path": "./repositories/languages/한국어-1",
+			"is_language": true,
+			"language": "한국어",
+			"should_update": true,
+			"should_read": true
+		}
+	],
+	"urls": [
+		{
+			"url": "default",
+			"type": "pic"
+		},
+		{
+			"url": "default",
+			"type": "field"
+		},
+		{
+			"url": "default",
+			"type": "cover"
+		}
+	],
+	"servers": [],
+	"posixPathExtension": "/usr/local/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands"
+}

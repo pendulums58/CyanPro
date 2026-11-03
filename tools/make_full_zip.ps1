@@ -3,6 +3,7 @@
 # freshly built cyanpro.exe / ocgcore.dll. Anything not listed stays out:
 # repositories and expansions-2 (the client clones them on first launch),
 # script, replay, screenshots, puzzles, decks, logs.
+# config/configs.json and user_configs.json come from tools/release_files/config.
 # config/system.conf is shipped with the personal fields reset to defaults,
 # and RELEASE_NOTES.md is the generated -Notes file, not the install's copy.
 param(
@@ -18,7 +19,9 @@ $Source = (Resolve-Path $Source).Path
 
 $rootFiles = "COPYING.txt", "LICENSE.txt", "README.md.txt", "cacert.pem", "init.lua"
 $trees = "WindBot", "config", "fonts", "notices", "skin", "sound", "textures"
-$skip = { param($rel) $rel -like "*.log" -or $rel -eq "config/system.conf" }
+# Repo lists come from tools/release_files/config, not the install, which may point at test repos
+$fixedConfigs = "configs.json", "user_configs.json"
+$skip = { param($rel) $rel -like "*.log" -or $rel -eq "config/system.conf" -or ($fixedConfigs | ForEach-Object { "config/$_" }) -contains $rel }
 $emptyDirs = "deck/", "pics/cover/", "pics/field/", "pics/temp/"
 # system.conf keys that hold the packager's own data, reset to game_config.inl defaults
 $resetKeys = [ordered]@{
@@ -41,6 +44,9 @@ foreach($t in $trees) {
 		if($rel -match "/\.git/" -or (& $skip $rel)) { return }
 		Add-File $_.FullName $rel
 	}
+}
+foreach($f in $fixedConfigs) {
+	Add-File (Resolve-Path (Join-Path $PSScriptRoot "release_files\config\$f")).Path "config/$f"
 }
 Add-File (Resolve-Path $Notes).Path "RELEASE_NOTES.md"
 Add-File (Join-Path $Source "expansions\cards.cdb") "expansions/cards.cdb"

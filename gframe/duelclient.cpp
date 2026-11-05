@@ -2522,7 +2522,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		mainGame->dField.selectable_cards.clear();
 		for(uint32_t i = 0; i < count; ++i) {
 			code = BufferIO::Read<uint32_t>(pbuf);
-			pbuf += (mainGame->dInfo.compat_mode) ? 3 : 6;
+			pbuf += (mainGame->dInfo.compat_mode) ? 3 : 7;
 			pcard = *(mainGame->dField.deck[player].rbegin() + i);
 			if (code != 0)
 				pcard->SetCode(code);
@@ -2558,7 +2558,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		const auto backit = mainGame->dField.extra[player].crbegin() + mainGame->dField.extra_p_count[player];
 		for(auto it = backit, end = it + count; it != end; ++it) {
 			code = BufferIO::Read<uint32_t>(pbuf);
-			pbuf += (mainGame->dInfo.compat_mode) ? 3 : 6;
+			pbuf += (mainGame->dInfo.compat_mode) ? 3 : 7;
 			pcard = *it;
 			if (code != 0)
 				pcard->SetCode(code);

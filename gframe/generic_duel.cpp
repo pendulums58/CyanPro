@@ -1127,7 +1127,7 @@ void GenericDuel::Sending(CoreUtils::Packet& packet, int& return_value, bool& re
 			pbufw = pbuf;
 			/*code = */BufferIO::Read<uint32_t>(pbuf);
 			int controler = BufferIO::Read<uint8_t>(pbuf);
-			pbuf += 6;
+			pbuf += 7;
 			if(controler != player)
 				BufferIO::Write<uint32_t>(pbufw, 0);
 		}

@@ -9,6 +9,7 @@
 # and RELEASE_NOTES.md is the generated -Notes file, not the install's copy.
 param(
 	[Parameter(Mandatory)][string]$Source,
+	[Parameter(Mandatory)][string]$TexturesSource,
 	[Parameter(Mandatory)][string]$Exe,
 	[Parameter(Mandatory)][string]$CoreDll,
 	[Parameter(Mandatory)][string]$Notes,
@@ -17,6 +18,7 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $Source = (Resolve-Path $Source).Path
+$TexturesSource = (Resolve-Path $TexturesSource).Path
 
 $rootFiles = "COPYING.txt", "LICENSE.txt", "README.md.txt", "cacert.pem", "init.lua"
 $trees = "config", "fonts", "notices", "skin", "sound", "textures"
@@ -38,10 +40,12 @@ foreach($f in $rootFiles) {
 	Add-File $p $f
 }
 foreach($t in $trees) {
-	$base = Join-Path $Source $t
+	# The packaging install's textures are out of date
+	$treeRoot = if($t -eq "textures") { $TexturesSource } else { $Source }
+	$base = Join-Path $treeRoot $t
 	if(!(Test-Path $base)) { throw "missing $base" }
 	Get-ChildItem $base -Recurse -File -Force | ForEach-Object {
-		$rel = $_.FullName.Substring($Source.Length + 1).Replace("\", "/")
+		$rel = $_.FullName.Substring($treeRoot.Length + 1).Replace("\", "/")
 		if($rel -match "/\.git/" -or (& $skip $rel)) { return }
 		Add-File $_.FullName $rel
 	}

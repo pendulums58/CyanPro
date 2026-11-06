@@ -717,7 +717,9 @@ void GenericDuel::TPResult(DuelPlayer* dp, uint8_t tp) {
 		for(int p = 0; p < 2; ++p) {
 			stat_activated[p].clear();
 			stat_summoned[p].clear();
+			stat_fetched[p].clear();
 		}
+		stat_opening = true;
 		if(stat_match_id.empty())
 			stat_match_id = stat_duel_id;   // first duel of the match
 	}
@@ -936,6 +938,8 @@ void GenericDuel::DuelEndProc() {
 				AppendCodeSet(js, "activated", stat_activated[i]);
 				js << ',';
 				AppendCodeSet(js, "summoned", stat_summoned[i]);
+				js << ',';
+				AppendCodeSet(js, "fetched", stat_fetched[i]);
 				js << '}';
 			}
 			js << "]}";
@@ -1012,6 +1016,33 @@ void GenericDuel::BeforeParsing(const CoreUtils::Packet& packet, [[maybe_unused]
 			std::set<uint32_t>* bucket = (packet.message == MSG_CHAINING) ? stat_activated : stat_summoned;
 			bucket[controler].insert(code);
 		}
+		break;
+	}
+	case MSG_NEW_PHASE: {
+		// The opening window closes at turn 1's standby phase
+		if(stat_opening && packet.buffer.size() >= sizeof(uint16_t)) {
+			const auto* p = packet.data();
+			if(BufferIO::Read<uint16_t>(p) >= PHASE_STANDBY)
+				stat_opening = false;
+		}
+		break;
+	}
+	case MSG_MOVE: {
+		// Deck -> hand by an effect during the opening window. The opening hand
+		// itself arrives as MSG_DRAW, so it never reaches here.
+		// Layout: code(4), previous loc_info, current loc_info, reason(4).
+		constexpr size_t loc_info_size = sizeof(uint8_t) + sizeof(uint16_t) + sizeof(uint32_t) + sizeof(uint32_t);
+		if(!stat_opening || packet.buffer.size() < sizeof(uint32_t) * 2 + loc_info_size * 2)
+			break;
+		const auto* p = packet.data();
+		const auto code = BufferIO::Read<uint32_t>(p);
+		const auto from = CoreUtils::ReadLocInfo(p, false);
+		const auto to = CoreUtils::ReadLocInfo(p, false);
+		const auto reason = BufferIO::Read<uint32_t>(p);
+		if(code && to.controler < 2
+		   && from.location == LOCATION_DECK && to.location == LOCATION_HAND
+		   && (reason & REASON_EFFECT) && !(reason & REASON_DRAW))
+			stat_fetched[to.controler].insert(code);
 		break;
 	}
 	default:

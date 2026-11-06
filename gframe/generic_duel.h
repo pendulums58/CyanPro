@@ -168,6 +168,12 @@ protected:
 	// home / opposing swap in TPResult() happens before the duel starts.
 	std::set<uint32_t> stat_activated[2];
 	std::set<uint32_t> stat_summoned[2];
+	// Cards each core player took from the deck into the hand by an effect between
+	// the start of the duel and turn 1's standby phase. That is where a designated
+	// companion comes to hand; the +1 card is what moves the win rate, so a
+	// companion designated while already in hand is deliberately not counted.
+	std::set<uint32_t> stat_fetched[2];
+	bool stat_opening = false;   // still inside that window
 };
 
 }

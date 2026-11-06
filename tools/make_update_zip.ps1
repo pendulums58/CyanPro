@@ -1,16 +1,22 @@
 # Builds the client self-update assets for a GitHub release:
 #   CyanPro-<ver>-update.zip  (cyanpro.exe, and ocgcore.dll if -CoreDll is given, at the zip root,
-#                              plus config/configs.json from tools/release_files/config)
+#                              plus config/configs.json from tools/release_files/config
+#                              and the textures in $textures from -TexturesSource)
 #   CyanPro-<ver>-update.md5  ("<md5>  <zip name>")
 # Upload both to the release next to the full CyanPro-<ver>-win32.zip.
 # The updater extracts the zip over the install folder, so it must only
 # contain files that are safe to overwrite on every user's machine.
 param(
+	[Parameter(Mandatory)][string]$TexturesSource,
 	[string]$Exe = (Join-Path $PSScriptRoot "..\bin\release\cyanpro.exe"),
 	[string]$CoreDll = "",
 	[string]$OutDir = "."
 )
 $ErrorActionPreference = "Stop"
+
+# The 1.0.4-1.0.7 full zips shipped old copies of these. Overwrites players' own
+# edits on every update, so remove them from the list once 1.0.8 is out.
+$textures = "AppIcon.png", "CREDITS.md.txt", "bg.jpg", "bg_deck.jpg", "bg_menu.jpg", "cover.jpg", "cover2.jpg", "negated.png", "unknown.jpg"
 
 $config = Get-Content (Join-Path $PSScriptRoot "..\gframe\config.h") -Raw
 $parts = foreach($k in "MAJOR", "MINOR", "PATCH") {
@@ -36,6 +42,9 @@ try {
 	}
 	# The shipped repo list; players' own repos live in user_configs.json, which is never overwritten
 	[void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, (Resolve-Path (Join-Path $PSScriptRoot "release_files\config\configs.json")), "config/configs.json")
+	foreach($t in $textures) {
+		[void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive, (Resolve-Path (Join-Path $TexturesSource "textures\$t")), "textures/$t")
+	}
 } finally {
 	$archive.Dispose()
 }

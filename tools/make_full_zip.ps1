@@ -5,6 +5,7 @@
 # a WindBot folder without .git is deleted and recloned anyway),
 # script, replay, screenshots, puzzles, decks, logs.
 # config/configs.json and user_configs.json come from tools/release_files/config.
+# expansions/cards.cdb is the empty DB in tools/release_files/expansions; cards come from the repos.
 # config/system.conf is shipped with the personal fields reset to defaults,
 # and RELEASE_NOTES.md is the generated -Notes file, not the install's copy.
 param(
@@ -54,7 +55,7 @@ foreach($f in $fixedConfigs) {
 	Add-File (Resolve-Path (Join-Path $PSScriptRoot "release_files\config\$f")).Path "config/$f"
 }
 Add-File (Resolve-Path $Notes).Path "RELEASE_NOTES.md"
-Add-File (Join-Path $Source "expansions\cards.cdb") "expansions/cards.cdb"
+Add-File (Resolve-Path (Join-Path $PSScriptRoot "release_files\expansions\cards.cdb")).Path "expansions/cards.cdb"
 Add-File (Resolve-Path $Exe).Path "cyanpro.exe"
 Add-File (Resolve-Path $CoreDll).Path "ocgcore.dll"
 

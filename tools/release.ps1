@@ -81,7 +81,7 @@ $notesText = (Get-Content (Join-Path $PSScriptRoot "release_notes\template.md") 
 $notesFile = Join-Path $root "release-out\$ver-notes.md"
 [IO.File]::WriteAllText($notesFile, $notesText, (New-Object Text.UTF8Encoding $false))
 
-& (Join-Path $PSScriptRoot "make_update_zip.ps1") -Exe $exe -CoreDll $dll -OutDir $out
+& (Join-Path $PSScriptRoot "make_update_zip.ps1") -TexturesSource $texturesInstall -Exe $exe -CoreDll $dll -OutDir $out
 & (Join-Path $PSScriptRoot "make_full_zip.ps1") -Source $install -TexturesSource $texturesInstall -Exe $exe -CoreDll $dll -Notes $notesFile -Version $ver -OutDir $out
 Copy-Item $exe $out -Force
 

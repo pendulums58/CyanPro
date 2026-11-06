@@ -123,6 +123,18 @@ void AppendCardArray(std::ostringstream& out, const char* key, const Deck::Vecto
 	out << ']';
 }
 
+void AppendCodeSet(std::ostringstream& out, const char* key, const std::set<uint32_t>& codes) {
+	out << '"' << key << "\":[";
+	bool first = true;
+	for(const auto code : codes) {
+		if(!first)
+			out << ',';
+		first = false;
+		out << code;
+	}
+	out << ']';
+}
+
 }
 
 ReplayStream GenericDuel::replay_stream;
@@ -702,6 +714,10 @@ void GenericDuel::TPResult(DuelPlayer* dp, uint8_t tp) {
 					  static_cast<unsigned long long>(seed[2]), static_cast<unsigned long long>(seed[3]));
 		stat_duel_id = buf;
 		++stat_game_no;
+		for(int p = 0; p < 2; ++p) {
+			stat_activated[p].clear();
+			stat_summoned[p].clear();
+		}
 		if(stat_match_id.empty())
 			stat_match_id = stat_duel_id;   // first duel of the match
 	}
@@ -915,7 +931,12 @@ void GenericDuel::DuelEndProc() {
 				AppendCardArray(js, "extra", deck.extra);
 				js << ',';
 				AppendCardArray(js, "side", deck.side);
-				js << "}}";
+				js << "},";
+				// Raw codes; the server keeps only the ones in this player's deck
+				AppendCodeSet(js, "activated", stat_activated[i]);
+				js << ',';
+				AppendCodeSet(js, "summoned", stat_summoned[i]);
+				js << '}';
 			}
 			js << "]}";
 			PostDuelStats(js.str());
@@ -973,6 +994,29 @@ void GenericDuel::Surrender(DuelPlayer* dp) {
 }
 #define SEND(to) NetServer::SendCoreUtilsPacketToPlayer(to, STOC_GAME_MSG, packet)
 void GenericDuel::BeforeParsing(const CoreUtils::Packet& packet, [[maybe_unused]] int& return_value, [[maybe_unused]] bool& record, bool& record_last) {
+	// ---- duel stats: which cards each player used this duel ----
+	// Read the core's message as it came; Sending() later blanks face-down codes.
+	// All four start with the card code, then loc_info whose first byte is the
+	// controller. Whoever controls it gets the credit, stolen cards included.
+	switch(packet.message) {
+	case MSG_CHAINING:
+	case MSG_SUMMONING:
+	case MSG_SPSUMMONING:
+	case MSG_FLIPSUMMONING: {
+		if(packet.buffer.size() < sizeof(uint32_t) + sizeof(uint8_t))
+			break;
+		const auto* p = packet.data();
+		const auto code = BufferIO::Read<uint32_t>(p);
+		const auto controler = BufferIO::Read<uint8_t>(p);
+		if(code && controler < 2) {
+			std::set<uint32_t>* bucket = (packet.message == MSG_CHAINING) ? stat_activated : stat_summoned;
+			bucket[controler].insert(code);
+		}
+		break;
+	}
+	default:
+		break;
+	}
 	const auto* pbuf = packet.data();
 	switch(packet.message) {
 	case MSG_SELECT_BATTLECMD:

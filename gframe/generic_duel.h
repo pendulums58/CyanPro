@@ -161,6 +161,13 @@ protected:
 	// match, so hand each one a fixed player_no on first sight and report that
 	// alongside the seat. Cleared when the match ends.
 	std::map<const DuelPlayer*, int> stat_player_no;
+	// Cards each core player (0 / 1) activated or summoned at least once in the
+	// current duel. Counted once per duel, not per use: with once-per-turn names a
+	// whole combo line activates the same number of times, so counts say little.
+	// Core player index equals the seat index DuelEndProc reports, because the
+	// home / opposing swap in TPResult() happens before the duel starts.
+	std::set<uint32_t> stat_activated[2];
+	std::set<uint32_t> stat_summoned[2];
 };
 
 }
